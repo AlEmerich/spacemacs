@@ -1,7 +1,7 @@
 ;;; -*- lexical-binding: t -*-
 ;;; core-transient-state.el --- Spacemacs Core File
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Justin Burkett <justin@burkett.cc>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -166,7 +166,7 @@ used."
          (body-func (spacemacs//transient-state-body-func-name name))
          (add-bindings (spacemacs//transient-state-add-bindings-name name))
          (remove-bindings (spacemacs//transient-state-remove-bindings-name name))
-         (bindings (spacemacs/mplist-get props :bindings))
+         (bindings (spacemacs/mplist-get-values props :bindings))
          (doc (or (plist-get props :doc) "\n"))
          (title (plist-get props :title))
          (hint-var (intern (format "%s/hint" func)))
@@ -176,7 +176,7 @@ used."
          (hint (plist-get props :hint))
          (hint-doc-p (plist-get props :hint-is-doc))
          (dyn-hint (plist-get props :dynamic-hint))
-         (additional-docs (spacemacs/mplist-get props :additional-docs))
+         (additional-docs (spacemacs/mplist-get-values props :additional-docs))
          (foreign-keys (plist-get props :foreign-keys))
          (bindkeys (spacemacs//create-key-binding-form props body-func)))
     `(progn

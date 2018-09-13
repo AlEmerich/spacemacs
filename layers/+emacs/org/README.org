@@ -15,6 +15,7 @@
   - [[#revealjs-support][Reveal.js support]]
   - [[#org-journal-support][Org-journal support]]
   - [[#hugo-support][Hugo support]]
+  - [[#trello-support][Trello support]]
   - [[#different-bullets][Different bullets]]
   - [[#project-support][Project support]]
   - [[#org-brain-support][Org-brain support]]
@@ -28,6 +29,8 @@
   - [[#trees][Trees]]
   - [[#element-insertion][Element insertion]]
   - [[#links][Links]]
+  - [[#babel--source-blocks][Babel / Source Blocks]]
+    - [[#org-babel-transient-state][Org Babel Transient State]]
   - [[#emphasis][Emphasis]]
   - [[#navigating-in-calendar][Navigating in calendar]]
   - [[#capture-buffers-and-src-blocks][Capture buffers and src blocks]]
@@ -58,7 +61,7 @@ For more extensive support of references through BibTeX files, have a look at
 the [[https://github.com/syl20bnr/spacemacs/blob/develop/layers/+lang/bibtex/README.org][BibTeX layer]].
 
 ** Important Note
-Since version 0.104, spacemacs uses the =org= version from the org ELPA
+Since version 0.104, spacemacs uses the =org= version from the =org= ELPA
 repository instead of the one shipped with emacs. Then, any =org= related code
 should not be loaded before =dotspacemacs/user-config=, otherwise both versions
 will be loaded and will conflict.
@@ -75,11 +78,17 @@ One way to avoid conflict is to wrap your =org= config code in a
     )
 #+END_SRC
 
+Please also note that everything described here only applies if you install this
+layer instead of manually loading =org= as separate emacs package.
+
+If this is not done you will encounter a lot of unbind key exceptions while working with org.
+More details can be found [[https://github.com/syl20bnr/spacemacs/issues/8106][here]].
+
 * Install
 ** Layer
-To use this configuration layer, add it to your =~/.spacemacs=. You will need to
-add =org= to the existing =dotspacemacs-configuration-layers= list in this
-file.
+To use this configuration layer: in the main Spacemacs configuration
+file (=~/.spacemacs=), to the existing =dotspacemacs-configuration-layers= list
+add the =org= entry.
 
 ** Github support
 To install Github related extensions like [[https://github.com/larstvei/ox-gfm][ox-gfm]] to export to Github
@@ -91,9 +100,9 @@ flavored markdown set the variable =org-enable-github-support= to =t=.
 #+END_SRC
 
 ** Twitter Bootstrap support
-To install the Twitter Boostrap extension (from [[https://github.com/marsmining/ox-twbs][ox-twbs]]), which enables twitter
-bootstrap formatted html, then set the variable =org-enable-bootstrap-support=
-to =t=.
+To enable the export to Twitter Bootstrap-formatted HTML - set
+the variable =org-enable-bootstrap-support= to =t=.
+This would install the [[https://github.com/marsmining/ox-twbs][ox-twbs]] extension.
 
 #+BEGIN_SRC emacs-lisp
   (setq-default dotspacemacs-configuration-layers '(
@@ -102,36 +111,43 @@ to =t=.
 #+END_SRC
 
 ** Gnuplot support
-Org-mode support the plotting of data within tables through [[http://www.gnuplot.info/][Gnuplot]] as
-demonstrated [[http://orgmode.org/worg/org-tutorials/org-plot.html][here]]; unfortunately, this is [[https://github.com/bruceravel/gnuplot-mode/issues/15][not terribly well supported]] on Windows
-at this stage.  It is possible to disable the configuration of gnuplot support
-as usual by adding the package =gnuplot= to your =dotspacemacs-excluded-packages=
-variable.
+Org-mode supports the plotting of data within tables through [[http://www.gnuplot.info/][Gnuplot]] as
+demonstrated [[http://orgmode.org/worg/org-tutorials/org-plot.html][here]].
+
+Unfortunately, this is [[https://github.com/bruceravel/gnuplot-mode/issues/15][not terribly well supported]] on Windows,
+at this stage. To disable the configuration of gnuplot support - add
+the =gnuplot= package to your =dotspacemacs-excluded-packages= variable.
 
 ** Reveal.js support
-To enable the export of your org file as a [[http://lab.hakim.se/reveal-js/][reveal.js]] presentation, set the
-variable =org-enable-reveal-js-support= to =t=. This will install the [[https://github.com/yjwen/org-reveal/][org-reveal]]
-extension.
+To enable the export of org files as a [[http://lab.hakim.se/reveal-js/][reveal.js]] presentation - set the
+variable =org-enable-reveal-js-support= to =t=.
+This would install the [[https://github.com/yjwen/org-reveal/][org-reveal]] Emacs extension.
 
 #+BEGIN_SRC emacs-lisp
   (setq-default dotspacemacs-configuration-layers
    '((org :variables org-enable-reveal-js-support t)))
 #+END_SRC
 
-In order to be able to use org-reveal, download =reveal.js= from its
-[[http://lab.hakim.se/reveal-js/#/][homepage]] and set =org-reveal-js= to the
-download path, as described in the [[https://github.com/yjwen/org-reveal#user-content-revealjs-and-org-reveal][manual]]. Alternatively, add the following line
-to each =.org= file you want to process:
+Then the extension needs to be pointed to the =reveal.js= itself.
+So [[https://github.com/hakimel/reveal.js/releases][download]] =reveal.js= and point =org-reveal-root= to the path,
+as it described in the [[https://github.com/yjwen/org-reveal#set-the-location-of-revealjs][manual]].
+
+Alternatively, add the following line to each =.org= file you want to process:
 
 #+BEGIN_EXAMPLE
 #+REVEAL_ROOT: http://cdn.jsdelivr.net/reveal.js/3.0.0/
 #+END_EXAMPLE
 
 ** Org-journal support
-[[https://github.com/bastibe/org-journal][org-journal]] is a simple journal management system for keeping a seperate journal
-file for each day inside a directory.
+[[https://github.com/bastibe/org-journal][org-journal]] is a simple journal management system that:
+  * Keeps a separate journal file for each day inside a directory
+  * New daily file would always migrate entries with chosen TODO states
+  * Has journal encryption functionality
+  * Easily integrates with org-agenda and Emacs calendar, iCalendar,
+    allows scheduling
+  * Easily integrates with org-capture
 
-To install org-journal set the variable =org-enable-org-journal-support= to =t=.
+To install org-journal - set the variable =org-enable-org-journal-support= to =t=.
 
 #+BEGIN_SRC emacs-lisp
   (setq-default dotspacemacs-configuration-layers '(
@@ -139,35 +155,33 @@ To install org-journal set the variable =org-enable-org-journal-support= to =t=.
          org-enable-org-journal-support t)))
 #+END_SRC
 
-By default journal files are stored in =~/Documents/journal/=. You can override
-this by setting =org-journal-dir= in =dotspacemacs/user-config=
+By default, journal files are stored in =~/Documents/journal/=. To override
+this - set =org-journal-dir= variable in the =dotspacemacs/user-config=:
 
 #+BEGIN_SRC emacs-lisp
     (setq org-journal-dir "~/org/journal/")
 #+END_SRC
 
-You can change the journal file name format by altering
-=org-journal-file-format=.
+To change the journal file name format - alter =org-journal-file-format=:
 
 #+BEGIN_SRC emacs-lisp
     (setq org-journal-file-format "%Y-%m-%d")
 #+END_SRC
 
 *Warning:* setting =org-journal-file-format= to include a file extension like
-=%Y-%m-%d.org= breaks calender search functionality.
+=%Y-%m-%d.org= would break the calendar search functionality.
 
-By default journal files are started with a first level heading (=*=) followed
-by the date formatted for the locale. If you prefer that your journal files are
-formatted differently you can alter =org-journal-date-prefix= and
-=org-journal-date-format=.
+By default, journal files are started with a first level heading (=*=) followed
+by the date in the form set by locale. To format journal files differently
+- alter =org-journal-date-prefix= and =org-journal-date-format=.
 
-For example, to have your new journal files created with this header:
+For example, to have new journal files created with this header:
 
 #+BEGIN_EXAMPLE
 #+TITLE: Tuesday, September 06 2016
 #+END_EXAMPLE
 
-Simply define the following in =dotspacemacs/user-config=
+- define the following in =dotspacemacs/user-config=:
 
 #+BEGIN_SRC emacs-lisp
     (setq org-journal-date-prefix "#+TITLE: ")
@@ -185,22 +199,23 @@ the timestamp.
 #+END_SRC
 
 Any of the org-journal settings can be configured in =dotspacemacs/user-config=
-or defined along side the layer itself.
+or defined alongside the layer itself.
 
 For example:
 
 #+Caption: Configure org-journal with the layer
+
 #+BEGIN_SRC emacs-lisp
   (setq-default dotspacemacs-configuration-layers '(
-                                                    (org :variables
-                                                         org-enable-org-journal-support t
-                                                         org-journal-dir "~/org/journal/"
-                                                         org-journal-file-format "%Y-%m-%d"
-                                                         org-journal-date-prefix "#+TITLE: "
-                                                         org-journal-date-format "%A, %B %d %Y"
-                                                         org-journal-time-prefix "* "
-                                                         org-journal-time-format "")
-                                                    )
+    (org :variables
+        org-enable-org-journal-support t
+        org-journal-dir "~/org/journal/"
+        org-journal-file-format "%Y-%m-%d"
+        org-journal-date-prefix "#+TITLE: "
+        org-journal-date-format "%A, %B %d %Y"
+        org-journal-time-prefix "* "
+        org-journal-time-format "")
+  )
 #+END_SRC
 
 ** Hugo support
@@ -212,6 +227,15 @@ To install the Org exporter [[https://ox-hugo.scripter.co][ox-hugo]] that genera
   (setq-default dotspacemacs-configuration-layers '(
     (org :variables
          org-enable-hugo-support t)))
+#+END_SRC
+
+** Trello support
+To install Trello support set the variable =org-enable-trello-support= to =t=.
+
+#+BEGIN_SRC emacs-lisp
+  (setq-default dotspacemacs-configuration-layers '(
+    (org :variables
+         org-enable-trello-support t)))
 #+END_SRC
 
 ** Different bullets
@@ -247,7 +271,10 @@ the following snippet. Note that this may have unintended consequences until
 #+BEGIN_SRC emacs-lisp
   (with-eval-after-load 'org-agenda
     (require 'org-projectile)
-    (push (org-projectile-todo-files) org-agenda-files))
+    (mapcar '(lambda (file)
+                   (when (file-exists-p file)
+                     (push file org-agenda-files)))
+            (org-projectile-todo-files)))
 #+END_SRC
 
 ** Org-brain support
@@ -267,28 +294,32 @@ To permanently enable mode line display of org clock, add this snippet to your
 * Key bindings
 ** Starting org-mode
 
-| Key Binding   | Description                    |
-|---------------+--------------------------------|
-| ~SPC a o #~   | org agenda list stuck projects |
-| ~SPC a o /~   | org occur in agenda files      |
-| ~SPC a o a~   | org agenda list                |
-| ~SPC a o c~   | org capture                    |
-| ~SPC a o e~   | org store agenda views         |
-| ~SPC a o k i~ | org clock in last              |
-| ~SPC a o k j~ | org jump to current clock      |
-| ~SPC a o k o~ | org clock out                  |
-| ~SPC a o k r~ | org resolve clocks             |
-| ~SPC a o l~   | org store link                 |
-| ~SPC a o m~   | org tags view                  |
-| ~SPC a o o~   | org agenda                     |
-| ~SPC a o s~   | org search view                |
-| ~SPC a o t~   | org todo list                  |
-| ~SPC C c~     | org-capture                    |
+| Key Binding   | Description                                                               |
+|---------------+---------------------------------------------------------------------------|
+| ~SPC a o #~   | org agenda list stuck projects                                            |
+| ~SPC a o /~   | org occur in agenda files                                                 |
+| ~SPC a o a~   | org agenda list                                                           |
+| ~SPC a o c~   | org capture                                                               |
+| ~SPC a o e~   | org store agenda views                                                    |
+| ~SPC a o f i~ | org feed goto inbox                                                       |
+| ~SPC a o f u~ | org feed update all                                                       |
+| ~SPC a o k g~ | org goto last clocked-in clock (go to specific recent clock with ~SPC u~) |
+| ~SPC a o k i~ | org clock in last                                                         |
+| ~SPC a o k j~ | org jump to current clock                                                 |
+| ~SPC a o k o~ | org clock out                                                             |
+| ~SPC a o k r~ | org resolve clocks                                                        |
+| ~SPC a o l~   | org store link                                                            |
+| ~SPC a o m~   | org tags view                                                             |
+| ~SPC a o o~   | org agenda                                                                |
+| ~SPC a o s~   | org search view                                                           |
+| ~SPC a o t~   | org todo list                                                             |
+| ~SPC C c~     | org-capture                                                               |
 
 ** Toggles
 
 | Key Binding | Description                                   |
 |-------------+-----------------------------------------------|
+| ~SPC m T c~ | org-toggle-checkbox                           |
 | ~SPC m T e~ | org-toggle-pretty-entities                    |
 | ~SPC m T i~ | org-toggle-inline-images                      |
 | ~SPC m T l~ | org-toggle-link-display                       |
@@ -320,6 +351,8 @@ To permanently enable mode line display of org clock, add this snippet to your
 | ~SPC m d T~                                  | org-time-stamp-inactive                      |
 | ~SPC m e e~                                  | org-export-dispatch                          |
 | ~SPC m e m~                                  | send current buffer as HTML email message    |
+| ~SPC m f i~                                  | org-feed-goto-inbox                          |
+| ~SPC m f u~                                  | org-feed-update-all                          |
 | ~SPC m l~                                    | org-open-at-point                            |
 | ~SPC m L~                                    | org-shiftright                               |
 | ~SPC m H~                                    | org-shiftleft                                |
@@ -404,7 +437,8 @@ are also available.
 | ~M-H~ / ~M-L~ | Promote or demote subtree       |
 | ~>>~ / ~<<~   | Promote or demote heading       |
 | ~TAB~         | org-cycle                       |
-| ~SPC m s a~   | org-archive-subtree             |
+| ~SPC m s a~   | Toggle archive tag for subtree  |
+| ~SPC m s A~   | Archive subtree                 |
 | ~SPC m s b~   | org-tree-to-indirect-buffer     |
 | ~SPC m s l~   | org-demote-subtree              |
 | ~SPC m s h~   | org-promote-subtree             |
@@ -429,6 +463,7 @@ are also available.
 | ~SPC m i h~   | org-insert-heading               |
 | ~SPC m i K~   | spacemacs/insert-keybinding-org  |
 | ~SPC m i l~   | org-insert-link                  |
+| ~SPC m i n~   | org-add-note                     |
 | ~SPC m i p~   | org-set-property                 |
 | ~SPC m i s~   | org-insert-subheading            |
 | ~SPC m i t~   | org-set-tags                     |
@@ -438,6 +473,47 @@ are also available.
 | Key Binding | Description       |
 |-------------+-------------------|
 | ~SPC m x o~ | org-open-at-point |
+
+** Babel / Source Blocks
+
+| Key Binding | Description                              |
+|-------------+------------------------------------------|
+| ~SPC m b .~ | Enter Babel Transient State              |
+| ~SPC m b a~ | org-babel-sha1-hash                      |
+| ~SPC m b b~ | org-babel-execute-buffer                 |
+| ~SPC m b c~ | org-babel-check-src-block                |
+| ~SPC m b d~ | org-babel-demarcate-block                |
+| ~SPC m b e~ | org-babel-execute-maybe                  |
+| ~SPC m b f~ | org-babel-tangle-file                    |
+| ~SPC m b g~ | org-babel-goto-named-src-block           |
+| ~SPC m b i~ | org-babel-lob-ingest                     |
+| ~SPC m b I~ | org-babel-view-src-block-info            |
+| ~SPC m b j~ | org-babel-insert-header-arg              |
+| ~SPC m b l~ | org-babel-load-in-session                |
+| ~SPC m b n~ | org-babel-next-src-block                 |
+| ~SPC m b o~ | org-babel-open-src-block-result          |
+| ~SPC m b p~ | org-babel-previous-src-block             |
+| ~SPC m b r~ | org-babel-goto-named-result              |
+| ~SPC m b s~ | org-babel-execute-subtree                |
+| ~SPC m b t~ | org-babel-tangle                         |
+| ~SPC m b u~ | org-babel-goto-src-block-head            |
+| ~SPC m b v~ | org-babel-expand-src-block               |
+| ~SPC m b x~ | org-babel-do-key-sequence-in-edit-buffer |
+| ~SPC m b z~ | org-babel-switch-to-session              |
+| ~SPC m b Z~ | org-babel-switch-to-session-with-code    |
+
+*** Org Babel Transient State
+Use ~SPC m b .~ to enter a transient state for quick source block navigation and
+execution.  During that state, the following bindings are active:
+
+| Key Binding | Description                   |
+|-------------+-------------------------------|
+| ~'~         | edit source block             |
+| ~e~         | execute source block          |
+| ~g~         | jump to named source block    |
+| ~j~         | jump to next source block     |
+| ~k~         | jump to previous source block |
+| ~q~         | leave transient state         |
 
 ** Emphasis
 
@@ -610,8 +686,8 @@ org-present must be activated explicitly by typing: ~SPC SPC org-present~
 | ~SPC a o j j~ | New journal entry      |
 | ~SPC a o j s~ | Search journal entries |
 
-Journal entries are highlighted in the calander. The following key bindings are
-available for =calander-mode= for navigating and manipulating the journal.
+Journal entries are highlighted in the calendar. The following key bindings are
+available for =calendar-mode= for navigating and manipulating the journal.
 
 | Key Binding | Description                           |
 |-------------+---------------------------------------|
@@ -654,3 +730,4 @@ are available.
 | ~o~         | Open and edit the visualized entry    |
 | ~f~         | Find/visit another entry to visualize |
 | ~r~         | Rename this, or another, entry        |
+|             |                                       |

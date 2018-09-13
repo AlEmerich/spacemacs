@@ -1,6 +1,6 @@
 ;;; packages.el --- Haskell Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -21,6 +21,7 @@
     ghc
     haskell-mode
     haskell-snippets
+    counsel-gtags
     helm-gtags
     (helm-hoogle :requires helm)
     hindent
@@ -135,6 +136,7 @@
         (spacemacs/declare-prefix-for-mode mode "mr" "haskell/refactor"))
       (spacemacs/declare-prefix-for-mode 'haskell-interactive-mode "ms" "haskell/repl")
       (spacemacs/declare-prefix-for-mode 'haskell-cabal-mode "ms" "haskell/repl")
+      (spacemacs/declare-prefix-for-mode 'intero-repl-mode "ms" "haskell/repl")
 
       ;; key bindings
       (defun spacemacs/haskell-process-do-type-on-prev-line ()
@@ -148,8 +150,8 @@
 
           "sb"  'haskell-process-load-file
           "sc"  'haskell-interactive-mode-clear
-          "ss"  'spacemacs/haskell-interactive-bring
-          "sS"  'haskell-interactive-switch
+          "sS"  'spacemacs/haskell-interactive-bring
+          "ss"  'haskell-interactive-switch
 
           "ca"  'haskell-process-cabal
           "cb"  'haskell-process-cabal-build
@@ -174,7 +176,9 @@
           "dp"  'haskell-debug/previous
           "dr"  'haskell-debug/refresh
           "ds"  'haskell-debug/step
-          "dt"  'haskell-debug/trace))
+          "dt"  'haskell-debug/trace
+
+          "ri"  'spacemacs/haskell-format-imports))
 
       (evilified-state-evilify haskell-debug-mode haskell-debug-mode-map
         "RET" 'haskell-debug/select
@@ -193,7 +197,9 @@
 
       ;; Switch back to editor from REPL
       (spacemacs/set-leader-keys-for-major-mode 'haskell-interactive-mode
-        "sS"  'haskell-interactive-switch-back)
+        "ss"  'haskell-interactive-switch-back)
+      (spacemacs/set-leader-keys-for-major-mode 'intero-repl-mode
+        "ss"  'intero-repl-switch-back)
 
       ;; Compile
       (spacemacs/set-leader-keys-for-major-mode 'haskell-cabal
@@ -211,8 +217,8 @@
         "n"   'haskell-cabal-next-subsection
         "p"   'haskell-cabal-previous-subsection
         "sc"  'haskell-interactive-mode-clear
-        "ss"  'spacemacs/haskell-interactive-bring
-        "sS"  'haskell-interactive-switch
+        "sS"  'spacemacs/haskell-interactive-bring
+        "ss"  'haskell-interactive-switch
         "N"   'haskell-cabal-next-section
         "P"   'haskell-cabal-previous-section
         "f"   'haskell-cabal-find-or-create-source-file)
@@ -256,21 +262,24 @@
 
   (with-eval-after-load 'yasnippet (haskell-snippets-initialize)))
 
+(defun haskell/post-init-counsel-gtags ()
+  (spacemacs/counsel-gtags-define-keys-for-mode 'haskell-mode))
+
 (defun haskell/post-init-helm-gtags ()
   (spacemacs/helm-gtags-define-keys-for-mode 'haskell-mode))
+
 
 ;; doesn't support literate-haskell-mode :(
 (defun haskell/init-hindent ()
   (use-package hindent
     :defer t
-    :if (stringp haskell-enable-hindent-style)
+    :if haskell-enable-hindent
     :init
     (add-hook 'haskell-mode-hook #'hindent-mode)
     :config
     (progn
-      (setq hindent-style haskell-enable-hindent-style)
       (spacemacs/set-leader-keys-for-major-mode 'haskell-mode
-        "f" 'hindent-reformat-decl))))
+        "f" 'hindent-reformat-decl-or-fill))))
 
 (defun haskell/init-hlint-refactor ()
   (use-package hlint-refactor

@@ -1,6 +1,6 @@
 ;;; packages.el --- Rust Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Chris Hoeppner <me@mkaito.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -13,13 +13,14 @@
   '(
     cargo
     company
+    counsel-gtags
     racer
     flycheck
     (flycheck-rust :requires flycheck)
     ggtags
-    exec-path-from-shell
     helm-gtags
     rust-mode
+    smartparens
     toml-mode
     ))
 
@@ -37,15 +38,16 @@
         "cd" 'cargo-process-doc
         "cD" 'cargo-process-doc-open
         "ce" 'cargo-process-bench
-        "cf" 'cargo-process-current-test
         "cf" 'cargo-process-fmt
         "ci" 'cargo-process-init
         "cl" 'cargo-process-clippy
         "cn" 'cargo-process-new
         "co" 'cargo-process-current-file-tests
         "cs" 'cargo-process-search
+        "ct" 'cargo-process-current-test
         "cu" 'cargo-process-update
         "cx" 'cargo-process-run
+        "cv" 'cargo-process-check
         "t" 'cargo-process-test))))
 
 (defun rust/post-init-flycheck ()
@@ -58,6 +60,9 @@
 
 (defun rust/post-init-ggtags ()
   (add-hook 'rust-mode-local-vars-hook #'spacemacs/ggtags-mode-enable))
+
+(defun rust/post-init-counsel-gtags ()
+  (spacemacs/counsel-gtags-define-keys-for-mode 'rust-mode))
 
 (defun rust/post-init-helm-gtags ()
   (spacemacs/helm-gtags-define-keys-for-mode 'rust-mode))
@@ -86,20 +91,13 @@
     ;; Don't pair lifetime specifiers
     (sp-local-pair 'rust-mode "'" nil :actions nil)))
 
-
-(defun rust/pre-init-exec-path-from-shell ()
-  (spacemacs|use-package-add-hook exec-path-from-shell
-    :pre-config
-    (let ((var "RUST_SRC_PATH"))
-      (unless (or (member var exec-path-from-shell-variables) (getenv var))
-        (push var exec-path-from-shell-variables)))))
-
 (defun rust/init-racer ()
   (use-package racer
     :defer t
     :init
     (progn
       (spacemacs/add-to-hook 'rust-mode-hook '(racer-mode))
+      (spacemacs/add-to-hook 'racer-mode-hook '(eldoc-mode))
       (spacemacs/declare-prefix-for-mode 'rust-mode "mg" "goto")
       (add-to-list 'spacemacs-jump-handlers-rust-mode 'racer-find-definition)
       (spacemacs/declare-prefix-for-mode 'rust-mode "mh" "help")

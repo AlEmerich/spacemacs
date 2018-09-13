@@ -1,6 +1,6 @@
 ;;; packages.el --- Spacemacs Purpose Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Bar Magal
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -91,24 +91,28 @@
         ;; popwin's :config block)
         (popwin-mode -1)))))
 
-(defun spacemacs-purpose/init-spacemacs-purpose-popwin ()
-  (use-package spacemacs-purpose-popwin
-    ;; defer loading of spacemacs-purpose-popwin
-    :commands pupo-mode)
-  ;; load spacemacs-purpose-popwin after window-purpose
+(defun spacemacs-purpose/pre-init-spacemacs-purpose-popwin ()
   (spacemacs|use-package-add-hook window-purpose
     :post-config
     (progn
-      (pupo-mode)
       ;; override popwin commands with pupo commands
       (spacemacs/set-leader-keys
         "wpp" #'pupo/close-window
-        "wpP" #'pupo/close-all-windows))))
+        "wpP" #'pupo/close-all-windows)
+      (pupo-mode))))
+(defun spacemacs-purpose/init-spacemacs-purpose-popwin ()
+  (use-package spacemacs-purpose-popwin :commands pupo-mode))
 
 (defun spacemacs-purpose/init-window-purpose ()
   (use-package window-purpose
+    :defer (spacemacs/defer)
     :init
     (progn
+      (add-hook 'emacs-startup-hook
+                (lambda ()
+                  (spacemacs|add-transient-hook window-configuration-change-hook
+                    (lambda () (require 'window-purpose))
+                    lazy-load-window-purpose)))
       ;; 'r' is for "puRpose" ('w', 'p' are crowded, 'W', 'P' aren't
       ;; comfortable)
       (spacemacs/set-leader-keys
@@ -117,10 +121,10 @@
         "rd" 'purpose-toggle-window-purpose-dedicated
         "rD" 'purpose-delete-non-dedicated-windows
         "rp" 'purpose-switch-buffer-with-some-purpose
-        "rP" 'purpose-set-window-purpose)
-      (purpose-mode))
+        "rP" 'purpose-set-window-purpose))
     :config
     (progn
+      (purpose-mode)
       ;; change `switch-to-buffer' display preferences according to
       ;; `dotspacemacs-switch-to-buffer-prefers-purpose'. This affects actions
       ;; like `spacemacs/alternate-buffer', and opening buffers from Dired

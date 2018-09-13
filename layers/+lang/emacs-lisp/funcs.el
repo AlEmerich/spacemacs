@@ -1,6 +1,6 @@
 ;;; funcs.el --- Emacs Lisp functions File
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -62,7 +62,7 @@ Unlike `eval-defun', this does not go to topmost function."
   "Additional processing when `edebug-mode' is activated or deactivated."
   (let ((evilified (or (eq 'vim dotspacemacs-editing-style)
                        (and (eq 'hybrid dotspacemacs-editing-style)
-                            hybrid-mode-enable-evilified-state))))
+                            hybrid-style-enable-evilified-state))))
     (if (not edebug-mode)
         ;; disable edebug-mode
         (when evilified (evil-normal-state))
@@ -105,3 +105,11 @@ Requires smartparens because all movement is done using `sp-forward-symbol'."
     (save-excursion
       (sp-forward-symbol)
       (call-interactively 'eval-last-sexp))))
+
+
+;; elisp comment text-object definition
+
+(defun spacemacs//define-elisp-comment-text-object ()
+  "Define a text object and a surround pair for elisp comments.
+Intended for use in mode hooks."
+  (spacemacs|define-text-object ";" "elisp-comment" ";; " ""))

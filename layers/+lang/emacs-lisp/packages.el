@@ -1,6 +1,6 @@
 ;;; packages.el --- Emacs Lisp Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -19,11 +19,16 @@
         elisp-slime-nav
         (emacs-lisp :location built-in)
         evil
+        evil-cleverparens
+        eval-sexp-fu
         flycheck
         ggtags
+        counsel-gtags
         helm-gtags
         (ielm :location built-in)
         macrostep
+        nameless
+        overseer
         parinfer
         semantic
         smartparens
@@ -104,9 +109,10 @@
 
 (defun emacs-lisp/init-auto-compile ()
   (use-package auto-compile
-    :defer t
+    :defer (spacemacs/defer)
     :init
     (progn
+      (spacemacs|require 'auto-compile)
       (setq auto-compile-display-buffer nil
             ;; lets spaceline manage the mode-line
             auto-compile-use-mode-line nil
@@ -121,9 +127,10 @@
 (defun emacs-lisp/init-elisp-slime-nav ()
   ;; Elisp go-to-definition with M-. and back again with M-,
   (use-package elisp-slime-nav
-    :defer t
+    :defer (spacemacs/defer)
     :init
     (progn
+      (spacemacs|require 'elisp-slime-nav)
       (add-hook 'emacs-lisp-mode-hook 'elisp-slime-nav-mode)
       (dolist (mode '(emacs-lisp-mode lisp-interaction-mode))
         (spacemacs/declare-prefix-for-mode mode "mg" "find-symbol")
@@ -158,7 +165,8 @@
 (defun emacs-lisp/init-macrostep ()
   (use-package macrostep
     :defer t
-    :mode ("\\*.el\\'" . emacs-lisp-mode)
+    :mode (("\\*.el\\'" . emacs-lisp-mode)
+           ("Cask\\'" . emacs-lisp-mode))
     :init
     (progn
       (evil-define-key 'normal macrostep-keymap "q" 'macrostep-collapse-all)
@@ -175,10 +183,64 @@
       (spacemacs/set-leader-keys-for-major-mode 'emacs-lisp-mode
         "dm" 'spacemacs/macrostep-transient-state/body))))
 
+(defun emacs-lisp/init-nameless ()
+  (use-package nameless
+    :defer (spacemacs/defer)
+    :init
+    (progn
+      (spacemacs|require 'nameless)
+      (setq
+       ;; always show the separator since it can have a semantic purpose
+       ;; like in Spacemacs where - is variable and / is a function.
+       ;; moreover it makes nameless work for all kind of separators.
+       nameless-separator nil
+       ;; Use > as the defautl prefix : is already used for
+       ;; keywords
+       nameless-prefix ">")
+      ;; some default aliases for Spacemacs source code
+      (setq nameless-global-aliases '(("SB" . "spacemacs-buffer")
+                                      ("S"  . "spacemacs")
+                                      (".S"  . "dotspacemacs")
+                                      ("CL" . "configuration-layer")))
+      ;; make `nameless-current-name' safe as a local variable for string values
+      (put 'nameless-current-name 'safe-local-variable #'stringp)
+      (spacemacs|diminish nameless-mode " 🅽" " [n]")
+      (spacemacs|add-toggle nameless
+        :status nameless-mode
+        :on (nameless-mode)
+        :off (nameless-mode -1)
+        :evil-leader-for-mode (emacs-lisp-mode . "Tn"))
+      ;; activate nameless only when in a GUI
+      ;; in a terminal nameless triggers all sorts of graphical glitches.
+      (spacemacs|do-after-display-system-init
+       (when emacs-lisp-hide-namespace-prefix
+         (spacemacs/toggle-nameless-on-register-hook-emacs-lisp-mode))))))
+
+(defun emacs-lisp/init-overseer ()
+  (use-package overseer
+    :defer t
+    :init (spacemacs/set-leader-keys-for-major-mode 'emacs-lisp-mode
+            "ta" 'overseer-test
+            "tt" 'overseer-test-run-test
+            "tb" 'overseer-test-this-buffer
+            "tf" 'overseer-test-file
+            "tg" 'overseer-test-tags
+            "tp" 'overseer-test-prompt
+            "tA" 'overseer-test-debug
+            "tq" 'overseer-test-quiet
+            "tv" 'overseer-test-verbose
+            "th" 'overseer-help)))
+
 (defun emacs-lisp/post-init-evil ()
-  (add-hook 'emacs-lisp-mode-hook
-            (lambda ()
-              (spacemacs|define-text-object ";" "elisp-comment" ";; " ""))))
+  (add-hook 'emacs-lisp-mode-hook #'spacemacs//define-elisp-comment-text-object))
+
+(defun emacs-lisp/pre-init-evil-cleverparens ()
+  (spacemacs|use-package-add-hook evil-cleverparens
+    :pre-init
+    (add-to-list 'evil-lisp-safe-structural-editing-modes 'emacs-lisp-mode)))
+
+(defun emacs-lisp/post-init-eval-sexp-fu ()
+  (add-hook 'emacs-lisp-mode-hook 'eval-sexp-fu-flash-mode))
 
 (defun emacs-lisp/post-init-flycheck ()
   ;; Don't activate flycheck by default in elisp
@@ -188,6 +250,9 @@
   ;; Make flycheck recognize packages in loadpath
   ;; i.e (require 'company) will not give an error now
   (setq flycheck-emacs-lisp-load-path 'inherit))
+
+(defun emacs-lisp/post-init-counsel-gtags ()
+  (spacemacs/counsel-gtags-define-keys-for-mode 'emacs-lisp-mode))
 
 (defun emacs-lisp/post-init-helm-gtags ()
   (spacemacs/helm-gtags-define-keys-for-mode 'emacs-lisp-mode))
@@ -204,7 +269,7 @@
     (semantic-default-elisp-setup)))
 
 (defun emacs-lisp/post-init-srefactor ()
-  (add-hook 'emacs-lisp-mode-hook 'spacemacs/lazy-load-srefactor)
+  (add-hook 'emacs-lisp-mode-hook 'spacemacs/load-srefactor)
   (use-package srefactor-lisp
     :commands (srefactor-lisp-format-buffer
                srefactor-lisp-format-defun

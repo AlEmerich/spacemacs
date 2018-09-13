@@ -1,6 +1,6 @@
 ;;; space-doc.el --- Spacemacs org minor mode. -*- lexical-binding: t -*-
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -471,7 +471,7 @@ Open all other links with `browse-url'."
                                  (or (match-string 2 path)
                                      "^")
                                  'subtree)
-      (browse-url (concat "https://" path)))))
+      (browse-url (concat "https:" path)))))
 
 (defun spacemacs//space-doc-find-regions-by-text-property
     (property value &optional start end)

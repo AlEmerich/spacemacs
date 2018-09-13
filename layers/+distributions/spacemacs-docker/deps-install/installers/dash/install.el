@@ -1,7 +1,7 @@
 #!/usr/bin/emacs --script
 ;;; install.el --- Dash layer dependencies installation script
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Eugene "JAremko" Yaremenko <w3techplayground@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -38,9 +38,7 @@
                  (mapconcat (lambda (docset) (symbol-name (car docset))) docsets " ")
                  " layers.\n Open a PR/issue if you need more. Docsets available at:"
                  " https://zealdocs.org/"))
-(with-installed (curl tar gzip software-properties-common)
-  ($ "add-apt-repository ppa:zeal-developers/ppa"
-     "apt-get update")
+(with-installed (curl tar gzip)
   (mkdirp docset-dir)
   (install zeal)
   (when (or (dotfile-has-symbol-p 'helm-dash-docset-newpath)

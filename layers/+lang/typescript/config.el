@@ -1,6 +1,6 @@
 ;;; config.el --- Typescript Layer Configuration File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -15,9 +15,12 @@
   "Run formatter on buffer save.")
 
 (defvar typescript-fmt-tool 'tide
-  "The name of the tool to be used
-for TypeScript source code formatting.
-Currently avaliable 'tide (default)
-and 'typescript-formatter .")
+  "The name of the tool to be used for TypeScript source code formatting.
+Currently avaliable 'tide (default), 'typescript-formatter and 'prettier.")
+
+(defvar typescript-backend 'tide
+  "The backend to use for IDE features. Possible values are `tide'
++and `lsp'.")
 
 (spacemacs|define-jump-handlers typescript-mode)
+(spacemacs|define-jump-handlers typescript-tsx-mode)

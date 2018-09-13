@@ -1,6 +1,6 @@
 ;;; funcs.el --- Org Layer functions File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -15,8 +15,8 @@
 (defun org-projectile/capture (&optional arg)
   (interactive "P")
   (if arg
-      (org-projectile-project-todo-completing-read nil :empty-lines 1)
-    (org-projectile-capture-for-current-project nil :empty-lines 1)))
+      (org-projectile-project-todo-completing-read :empty-lines 1)
+    (org-projectile-capture-for-current-project :empty-lines 1)))
 
 (defun org-projectile/goto-todos ()
   (interactive)
@@ -44,3 +44,26 @@
 (defun spacemacs//evil-org-mode ()
   (evil-org-mode)
   (evil-normalize-keymaps))
+
+(defun spacemacs/org-setup-evil-surround ()
+  (with-eval-after-load 'evil-surround
+    (add-to-list 'evil-surround-pairs-alist '(?: . spacemacs//surround-drawer))
+    (add-to-list 'evil-surround-pairs-alist '(?# . spacemacs//surround-code))))
+
+
+
+(defun spacemacs/org-trello-pull-buffer ()
+  (interactive)
+  (org-trello-sync-buffer 1))
+
+(defun spacemacs/org-trello-push-buffer ()
+  (interactive)
+  (org-trello-sync-buffer))
+
+(defun spacemacs/org-trello-pull-card ()
+  (interactive)
+  (org-trello-sync-card 1))
+
+(defun spacemacs/org-trello-push-card ()
+  (interactive)
+  (org-trello-sync-card))

@@ -1,6 +1,6 @@
 ;;; packages.el --- treemacs Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Alexander Miller <alexanderm@web.de>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -24,36 +24,47 @@
 
 (defun treemacs/init-treemacs ()
   (use-package treemacs
-    :commands treemacs--window-number-ten
+    :commands (treemacs-select-window treemacs--window-number-ten
+               treemacs-current-visibility)
     :defer t
     :init
-    (spacemacs/set-leader-keys
-      "ft"    #'treemacs-toggle
-      "fT"    #'treemacs
-      "fB"    #'treemacs-bookmark
-      "f C-t" #'treemacs-find-file)
-    :config
     (progn
-      (spacemacs/add-evil-cursor "treemacs" "MediumPurple1" '(hbar . 0))
       (setq treemacs-follow-after-init t
             treemacs-width 35
             treemacs-position 'left
             treemacs-is-never-other-window nil
             treemacs-silent-refresh nil
             treemacs-indentation 2
-            treemacs-git-integration t
             treemacs-change-root-without-asking nil
             treemacs-sorting 'alphabetic-desc
             treemacs-show-hidden-files t
             treemacs-never-persist nil
             treemacs-goto-tag-strategy 'refetch-index
             treemacs-collapse-dirs treemacs-use-collapsed-directories)
-
+      (spacemacs/set-leader-keys
+        "ft"    'treemacs
+        "fB"    'treemacs-bookmark
+        "fT"    'treemacs-find-file
+        "f M-t" 'treemacs-find-tag
+        "pt"    'spacemacs/treemacs-project-toggle)
+      (which-key-add-major-mode-key-based-replacements 'treemacs-mode
+        "c"     "treemacs-create"
+        "o"     "treemacs-visit-node"
+        "oa"    "treemacs-visit-node-ace"
+        "t"     "treemacs-toggles"
+        "y"     "treemacs-copy"
+        "C-p"   "treemacs-projects"
+        "C-p c" "treemacs-projects-collapse"))
+    :config
+    (progn
+      (spacemacs/define-evil-state-face "treemacs" "MediumPurple1")
       (when treemacs-use-follow-mode
         (treemacs-follow-mode t))
-
       (when treemacs-use-filewatch-mode
-        (treemacs-filewatch-mode t)))))
+        (treemacs-filewatch-mode t))
+      (when (memq treemacs-use-git-mode '(simple extended))
+        (treemacs-git-mode treemacs-use-git-mode))
+      (add-to-list 'spacemacs-window-split-ignore-prefixes treemacs--buffer-name-prefix))))
 
 (defun treemacs/init-treemacs-evil ()
   (use-package treemacs-evil
@@ -62,13 +73,13 @@
 
 (defun treemacs/init-treemacs-projectile ()
   (use-package treemacs-projectile
-    :defer t
-    :init
-    (spacemacs/set-leader-keys
-      "fp" #'treemacs-projectile-toggle
-      "fP" #'treemacs-projectile)))
+    :after treemacs
+    :defer t))
 
 (defun treemacs/pre-init-winum ()
   (spacemacs|use-package-add-hook winum
     :post-config
-    (add-to-list 'winum-assign-functions #'treemacs--window-number-ten)))
+    (progn
+      ;; window 0 is reserved for file trees
+      (spacemacs/set-leader-keys "0" 'treemacs-select-window)
+      (define-key winum-keymap (kbd "M-0") 'treemacs-select-window))))

@@ -1,6 +1,6 @@
 ;;; packages.el --- Spacemacs Layouts Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -15,7 +15,7 @@
         ivy
         persp-mode
         spaceline
-        swiper))
+        (counsel-projectile :requires projectile)))
 
 
 
@@ -85,14 +85,17 @@
       ;; declare in the layout transient state
       (spacemacs/set-leader-keys "bW" 'spacemacs/goto-buffer-workspace)
       ;; hooks
-      (add-hook 'persp-before-switch-functions
-                #'spacemacs/update-eyebrowse-for-perspective)
-      (add-hook 'eyebrowse-post-window-switch-hook
-                #'spacemacs/save-eyebrowse-for-perspective)
-      (add-hook 'persp-activated-functions
-                #'spacemacs/load-eyebrowse-for-perspective)
-      (add-hook 'persp-before-save-state-to-file-functions #'spacemacs/update-eyebrowse-for-perspective)
-      (add-hook 'persp-after-load-state-functions #'spacemacs/load-eyebrowse-after-loading-layout)
+      (when (configuration-layer/package-used-p 'persp-mode)
+        (add-hook 'persp-before-switch-functions
+                  #'spacemacs/update-eyebrowse-for-perspective)
+        (add-hook 'eyebrowse-post-window-switch-hook
+                  #'spacemacs/save-eyebrowse-for-perspective)
+        (add-hook 'persp-activated-functions
+                  #'spacemacs/load-eyebrowse-for-perspective)
+        (add-hook 'persp-before-save-state-to-file-functions
+                  #'spacemacs/update-eyebrowse-for-perspective)
+        (add-hook 'persp-after-load-state-functions
+                  #'spacemacs/load-eyebrowse-after-loading-layout))
       ;; vim-style tab switching
       (define-key evil-motion-state-map "gt" 'eyebrowse-next-window-config)
       (define-key evil-motion-state-map "gT" 'eyebrowse-prev-window-config))))
@@ -116,7 +119,8 @@
   (use-package persp-mode
     :init
     (progn
-      (setq persp-auto-resume-time (if (or dotspacemacs-auto-resume-layouts
+      (setq persp-add-buffer-on-after-change-major-mode 'free
+            persp-auto-resume-time (if (or dotspacemacs-auto-resume-layouts
                                            spacemacs-force-resume-layouts)
                                        1 -1)
             persp-is-ibc-as-f-supported nil
@@ -126,12 +130,6 @@
             persp-save-dir spacemacs-layouts-directory
             persp-set-ido-hooks t)
 
-      (defun spacemacs//activate-persp-mode ()
-        "Always activate persp-mode, unless it is already active.
- (e.g. don't re-activate during `dotspacemacs/sync-configuration-layers' -
- see issues #5925 and #3875)"
-        (unless (bound-and-true-p persp-mode)
-          (persp-mode)))
       (spacemacs/defer-until-after-user-config #'spacemacs//activate-persp-mode)
 
       ;; layouts transient state
@@ -221,6 +219,7 @@
       (defadvice persp-activate (before spacemacs//save-toggle-layout activate)
         (setq spacemacs--last-selected-layout persp-last-persp-name))
       (add-hook 'persp-mode-hook 'spacemacs//layout-autosave)
+      (advice-add 'persp-load-state-from-file :before 'spacemacs//layout-wait-for-modeline)
       (spacemacs/declare-prefix "b" "persp-buffers")
       ;; Override SPC TAB to only change buffers in perspective
       (spacemacs/set-leader-keys
@@ -235,5 +234,7 @@
 
 
 
-(defun spacemacs-layouts/post-init-swiper ()
-  (spacemacs/set-leader-keys "pl" 'spacemacs/ivy-persp-switch-project))
+(defun spacemacs-layouts/init-counsel-projectile ()
+  (use-package counsel-projectile
+    :defer t
+    :init (spacemacs/set-leader-keys "pl" 'spacemacs/ivy-persp-switch-project)))

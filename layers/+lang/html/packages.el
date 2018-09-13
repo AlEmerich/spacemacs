@@ -1,6 +1,6 @@
 ;;; packages.el --- HTML Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -19,9 +19,12 @@
         evil-matchit
         flycheck
         haml-mode
+        (counsel-css :requires ivy
+                     :location (recipe :fetcher github :repo "hlissner/emacs-counsel-css"))
         (helm-css-scss :requires helm)
         impatient-mode
         less-css-mode
+        prettier-js
         pug-mode
         sass-mode
         scss-mode
@@ -30,6 +33,7 @@
         tagedit
         web-mode
         yasnippet
+        web-beautify
         ))
 
 (defun html/post-init-add-node-modules-path ()
@@ -77,32 +81,9 @@
       (when (version< emacs-version "25")
         (add-hook 'css-mode-hook 'spacemacs/run-prog-mode-hooks))
 
-      (defun css-expand-statement ()
-        "Expand CSS block"
-        (interactive)
-        (save-excursion
-          (end-of-line)
-          (search-backward "{")
-          (forward-char 1)
-          (while (or (eobp) (not (looking-at "}")))
-          (let ((beg (point)))
-            (newline)
-            (search-forward ";")
-            (indent-region beg (point))
-            ))
-          (newline)))
-
-      (defun css-contract-statement ()
-        "Contract CSS block"
-        (interactive)
-        (end-of-line)
-        (search-backward "{")
-        (while (not (looking-at "}"))
-          (join-line -1)))
-
       (spacemacs/set-leader-keys-for-major-mode 'css-mode
-        "zc" 'css-contract-statement
-        "zo" 'css-expand-statement))))
+        "zc" 'spacemacs/css-contract-statement
+        "zo" 'spacemacs/css-expand-statement))))
 
 (defun html/init-emmet-mode ()
   (use-package emmet-mode
@@ -116,8 +97,6 @@
     (progn
       (evil-define-key 'insert emmet-mode-keymap (kbd "TAB") 'spacemacs/emmet-expand)
       (evil-define-key 'insert emmet-mode-keymap (kbd "<tab>") 'spacemacs/emmet-expand)
-      (evil-define-key 'emacs emmet-mode-keymap (kbd "TAB") 'spacemacs/emmet-expand)
-      (evil-define-key 'emacs emmet-mode-keymap (kbd "<tab>") 'spacemacs/emmet-expand)
       (evil-define-key 'hybrid emmet-mode-keymap (kbd "TAB") 'spacemacs/emmet-expand)
       (evil-define-key 'hybrid emmet-mode-keymap (kbd "<tab>") 'spacemacs/emmet-expand)
       (spacemacs|hide-lighter emmet-mode))))
@@ -139,6 +118,14 @@
   (use-package haml-mode
     :defer t))
 
+(defun html/init-counsel-css ()
+  (use-package counsel-css
+    :defer t
+    :init (cl-loop for (mode . mode-hook) in '((css-mode . css-mode-hook)
+                                            (scss-mode . scss-mode-hook))
+                do (add-hook mode-hook 'counsel-css-imenu-setup)
+                (spacemacs/set-leader-keys-for-major-mode mode "gh" 'counsel-css))))
+
 (defun html/init-helm-css-scss ()
   (use-package helm-css-scss
     :defer t
@@ -158,6 +145,11 @@
   (use-package less-css-mode
     :defer t
     :mode ("\\.less\\'" . less-css-mode)))
+
+(defun html/pre-init-prettier-js ()
+  (if (eq web-fmt-tool 'prettier)
+      (dolist (mode '(css-mode less-css-mode scss-mode))
+        (add-to-list 'spacemacs--prettier-modes mode))))
 
 (defun html/init-pug-mode ()
   (use-package pug-mode
@@ -201,12 +193,12 @@
     :defer t
     :config
     (progn
-      (spacemacs/declare-prefix-for-mode 'web-mode "me" "errors")
+      (spacemacs/declare-prefix-for-mode 'web-mode "mE" "errors")
       (spacemacs/declare-prefix-for-mode 'web-mode "mg" "goto")
       (spacemacs/declare-prefix-for-mode 'web-mode "mh" "dom")
       (spacemacs/declare-prefix-for-mode 'web-mode "mr" "refactor")
       (spacemacs/set-leader-keys-for-major-mode 'web-mode
-        "eh" 'web-mode-dom-errors-show
+        "El" 'web-mode-dom-errors-show
         "gb" 'web-mode-element-beginning
         "gc" 'web-mode-element-child
         "gp" 'web-mode-element-parent
@@ -266,6 +258,7 @@
     (("\\.phtml\\'"      . web-mode)
      ("\\.tpl\\.php\\'"  . web-mode)
      ("\\.twig\\'"       . web-mode)
+     ("\\.xml\\'"        . web-mode)
      ("\\.html\\'"       . web-mode)
      ("\\.htm\\'"        . web-mode)
      ("\\.[gj]sp\\'"     . web-mode)
@@ -283,3 +276,8 @@
   (spacemacs/add-to-hooks 'spacemacs/load-yasnippet '(css-mode-hook
                                                       jade-mode
                                                       slim-mode)))
+(defun html/pre-init-web-beautify ()
+  (if (eq web-fmt-tool 'web-beautify)
+      (add-to-list 'spacemacs--web-beautify-modes (cons 'css-mode 'web-beautify-css)))
+  ;; always use web-beautify for a .html file
+  (add-to-list 'spacemacs--web-beautify-modes (cons 'web-mode 'web-beautify-html)))

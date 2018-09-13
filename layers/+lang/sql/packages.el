@@ -1,6 +1,6 @@
 ;;; packages.el --- sql Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Brian Hicks <brian@brianthicks.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -13,7 +13,15 @@
       '(
         company
         sql
-        sql-indent
+        ;; This mode is more up-to-date than the MELPA one.
+        ;; Turns out that it is available in GNU ELPA but we cannot
+        ;; force Spacemacs to fetch from it for now, it will always
+        ;; pickup the MELPA version. So for now we use an explicit
+        ;; recip to fetch from GitHUb the package.
+        (sql-indent :location (recipe
+                               :fetcher github
+                               :repo "alex-hhh/emacs-sql-indent"
+                               :files ("sql-indent.el")))
         (sqlup-mode :toggle sql-capitalize-keywords)
         ))
 
@@ -23,14 +31,13 @@
     :init (spacemacs/register-repl 'sql 'spacemacs/sql-start "sql")
     :config
     (progn
-      (setq spacemacs-sql-highlightable sql-product-alist
-            spacemacs-sql-startable (remove-if-not
-                                (lambda (product) (sql-get-product-feature (car product) :sqli-program))
-                                sql-product-alist)
-
+      (setq
             ;; should not set this to anything else than nil
             ;; the focus of SQLi is handled by spacemacs conventions
             sql-pop-to-buffer-after-send-region nil)
+      (advice-add 'sql-add-product :after #'spacemacs/sql-populate-products-list)
+      (advice-add 'sql-del-product :after #'spacemacs/sql-populate-products-list)
+      (spacemacs/sql-populate-products-list)
 
       (defun spacemacs//sql-source (products)
         "return a source for helm selection"
@@ -127,7 +134,10 @@
 
 (defun sql/init-sql-indent ()
   (use-package sql-indent
-    :defer t))
+    :if sql-auto-indent
+    :defer t
+    :init (add-hook 'sql-mode-hook 'sqlind-minor-mode)
+    :config (spacemacs|hide-lighter sqlind-minor-mode)))
 
 (defun sql/init-sqlup-mode ()
   (use-package sqlup-mode
@@ -141,7 +151,7 @@
         "=c" 'sqlup-capitalize-keywords-in-region))
     :config
     (progn
-      (spacemacs|diminish sqlup-mode)
+      (spacemacs|hide-lighter sqlup-mode)
       (setq sqlup-blacklist (append sqlup-blacklist
                                     sql-capitalize-keywords-blacklist)))))
 

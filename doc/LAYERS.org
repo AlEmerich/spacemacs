@@ -119,10 +119,10 @@ loaded before their code runs.
 When loaded using =require=, Emacs looks for files in its /load path/. This is
 nothing more than a list of paths where elisp files can be found, and you can
 inspect it through ~SPC h d v load-path~ in Spacemacs. To add to the load path,
-simply push to this list, e.g.
+simply add to this list, e.g.
 
 #+begin_src emacs-lisp
-(push "/some/path/" load-path)
+(add-to-list 'load-path "/some/path/")
 #+end_src
 
 ** Auto-loading
@@ -509,7 +509,7 @@ The =shadow= operator is a binary operator accepting two layer names, it is not
 commutative and the order of the operands is determined by the order of the
 layers in the dotfile (like the ownership stealing mechanism).
 
-If =:can-shadow= property is set explicity to =nil= in the dotfile then the
+If =:can-shadow= property is set explicitly to =nil= in the dotfile then the
 layer won't shadow any layer.
 
 For instance to install both ivy and helm layer:
@@ -577,9 +577,8 @@ Since a call to =use-package= may evaluate the =:init= block immediately, any
 function that wants to inject code into this block must run =before= the call to
 =use-package=. Further, since this call to =use-package= typically takes place
 in the =init-<package>= function, calls to =spacemacs|use-package-add-hook=
-typically happen in the =pre-init-<package>= functions, and not in
-=post-init-<package>=. It is quite safe to do this in =pre-init=, so that should
-be the default choice.
+*always* happen in the =pre-init-<package>= functions, and not in
+=post-init-<package>=.
 
 ** Best practices
 If you break any of these rules, you should know what you are doing and have a

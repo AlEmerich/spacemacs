@@ -22,6 +22,7 @@
     - [[#in-terminal][In terminal]]
   - [[#building-and-compilation][Building and Compilation]]
   - [[#debugging][Debugging]]
+  - [[#errors][Errors]]
   - [[#plain-text-markup-languages][Plain Text Markup Languages]]
     - [[#headers][Headers]]
     - [[#insertion-of-common-elements][Insertion of common elements]]
@@ -35,6 +36,7 @@
   - [[#toggles][Toggles]]
   - [[#refactoring][Refactoring]]
   - [[#code-formatting][Code Formatting]]
+  - [[#web-frameworks][Web frameworks]]
   - [[#help-or-documentation][Help or Documentation]]
 - [[#writing-documentation][Writing documentation]]
   - [[#spacing-in-documentation][Spacing in documentation]]
@@ -239,6 +241,15 @@ Notes:
     the spacemacs level and ideally the function should be proposed as a patch
     upstream (major mode repository).
 
+** Errors
+Management of errors should be put under ~SPC m E~.
+
+| Key Binding | Description                         |
+|-------------+-------------------------------------|
+| ~m E e~     | fix error around point              |
+| ~m E l~     | show errors                         |
+| ~m E L~     | show errors and jump to errors list |
+
 ** Plain Text Markup Languages
 For layers supporting markup languages please follow the following
 keybindings whenever applicable.
@@ -290,7 +301,8 @@ In normal mode Vim style movement should be enabled with these keybindings:
 
 *** Promotion, Demotion and element movement
 Promotion, demotion and movement of headings or list elements (whatever is
-possible) should be enabled with the following keys in any mode
+possible) should be enabled with the following keys when in Vim style or
+Hybrid with hjkl movements enabled:
 
 | Key Binding | Description                  |
 |-------------+------------------------------|
@@ -298,6 +310,16 @@ possible) should be enabled with the following keys in any mode
 | ~M-j~       | Move element down            |
 | ~M-k~       | Move element up              |
 | ~M-l~       | Demote heading by one level  |
+
+In all editing styles promotion and demotion can be done with the following
+keys:
+
+| Key Binding | Description                  |
+|-------------+------------------------------|
+| ~M-down~    | Move element down            |
+| ~M-left~    | Promote heading by one level |
+| ~M-right~   | Demote heading by one level  |
+| ~M-up~      | Move element up              |
 
 *** Table editing
 If table specific commands are available the they are grouped under the
@@ -307,6 +329,7 @@ If table specific commands are available the they are grouped under the
 A lot of languages have their own test frameworks. These frameworks
 share common actions that we can unite under the same key bindings:
  - ~SPC m t~ is the prefix for test execution.
+ - ~SPC m t g~ is the prefix for test generation.
  - ~SPC m t X~ is used to execute ~SPC m t x~ but in debug mode (if supported).
 
 *** All languages
@@ -351,6 +374,9 @@ Major-mode code formatting is under prefix ~SPC m =~.
 | ~m = =~     | format thing under point |
 | ~m = b~     | format current buffer    |
 | ~m = f~     | format current function  |
+
+** Web frameworks
+Web frameworks key bindings should go under ~SPC m f~.
 
 ** Help or Documentation
 The base prefix for help commands is ~SPC m h~. Documentation is considered

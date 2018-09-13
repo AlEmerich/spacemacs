@@ -4,6 +4,7 @@
 
 * Table of Contents                                         :TOC_4_gh:noexport:
 - [[#description][Description]]
+  - [[#features][Features:]]
 - [[#layer-installation][Layer Installation]]
   - [[#layer][Layer]]
   - [[#choosing-a-backend][Choosing a backend]]
@@ -18,10 +19,14 @@
     - [[#configuration][Configuration]]
     - [[#usage][Usage]]
   - [[#ensime][ENSIME]]
-    - [[#installation-2][Installation]]
+    - [[#installation-when-using-sbt][Installation when using SBT]]
+    - [[#installation-when-using-gradle][Installation when using Gradle]]
     - [[#configuration-1][Configuration]]
     - [[#usage-1][Usage]]
     - [[#issues][Issues]]
+  - [[#lsp-java][LSP Java]]
+    - [[#instalation][Instalation]]
+    - [[#configuration-2][Configuration]]
 - [[#key-bindings][Key bindings]]
   - [[#meghanada-1][Meghanada]]
     - [[#server][Server]]
@@ -35,7 +40,6 @@
       - [[#ant][Ant]]
       - [[#project-management][Project management]]
       - [[#eclim-daemon][Eclim daemon]]
-      - [[#maven][Maven]]
       - [[#goto][Goto]]
       - [[#refactoring-1][Refactoring]]
       - [[#documentation-find][Documentation, Find]]
@@ -57,12 +61,23 @@
     - [[#refactoring-2][Refactoring]]
     - [[#tests-1][Tests]]
     - [[#repl][REPL]]
+  - [[#lsp-java-1][LSP Java]]
+  - [[#maven][Maven]]
+  - [[#gradle][Gradle]]
 
 * Description
-This layer adds support for the Java language, it supports multiple backends:
-- the [[https://github.com/mopemope/meghanada-emacs][Meghanada]] client/server (default),
-- the [[http://eclim.org][Eclim]] client/server,
-- the [[https://ensime.github.io/][ENSIME]] client/server.
+This layer adds support for the Java language.
+
+** Features:
+- Support for the following backends:
+  - [[https://github.com/mopemope/meghanada-emacs][Meghanada]] client/server (default),
+  - [[http://eclim.org][Eclim]] client/server,
+  - [[https://ensime.github.io/][ENSIME]] client/server.
+  - [[https://github.com/emacs-lsp/lsp-java][LSP Java]] client/server.
+- Each provides:
+  - Auto-completion using company
+  - Linting using flycheck integration
+  - Maven and Gradle integration
 
 * Layer Installation
 ** Layer
@@ -93,9 +108,10 @@ Backend can be chosen on a per project basis using directory local variables
 If you want to use the Ensime backend, you should modify your =~/.spacemacs= to
 use the recommended Ensime version (Stable). Please add the following lines to
 =dotspacemacs/user-init=:
+
 #+BEGIN_SRC emacs-lisp
-  (push '("melpa-stable" . "stable.melpa.org/packages/") configuration-layer-elpa-archives)
-  (push '(ensime . "melpa-stable") package-pinned-packages)
+  (add-to-list 'configuration-layer-elpa-archives '("melpa-stable" . "stable.melpa.org/packages/"))
+  (add-to-list 'package-pinned-packages '(ensime . "melpa-stable"))
 #+END_SRC
 
 * Backends
@@ -125,8 +141,7 @@ at the root of your project first.
 
 ** Eclim
 Eclim provides the ability to access Eclipse features such as code completion,
-searching, code validation, and many more. This is the default value for the
-layer variable =java-backend=.
+searching, code validation, and many more.
 
 *** Installation
 **** Eclipse
@@ -166,7 +181,7 @@ Eclim workspace (default value is =~/workspace=), as shown below:
    (setq
     ;; Specify the workspace to use by default
     eclimd-default-workspace "/path/to/default/eclipse/workspace"
-    ;; wether autostarting eclimd or not (default nil)
+    ;; whether autostarting eclimd or not (default nil)
     eclimd-autostart t
     ;; Whether or not to block emacs until eclimd is ready (default nil)
     eclimd-wait-for-process t)
@@ -187,12 +202,18 @@ Another backend option is the ENSIME server, which is a lot more responsive than
 Eclim. ENSIME is originally made to work with Scala but it now works with plain
 Java projects as well.
 
-*** Installation
+*** Installation when using SBT
 Find it with your favourite package manager, eg:
+
 #+BEGIN_SRC shell
   nix-env --install sbt
 #+END_SRC
+
 or refer to [[http://www.scala-sbt.org/download.html][the sbt installation instructions]].
+
+*** Installation when using Gradle
+Refer to the [[https://ensime.github.io/build_tools/gradle/][Ensime installation instructions]] to install the =ensime-gradle=
+plugin.
 
 *** Configuration
 Follow [[https://ensime.github.io/build_tools/sbt/][the ENSIME configuration instructions]]. Spacemacs uses
@@ -201,6 +222,7 @@ the development version of Ensime so follow the appropriate steps.
 To use the build functions under ~SPC m b~ you need to use version =0.13.5= or
 newer of =sbt=, and specify that in your project's =project/build.properties=.
 For example,
+
 #+BEGIN_SRC scala
   sbt.version=0.13.11
 #+END_SRC
@@ -214,6 +236,40 @@ will suffice do the trick.
 ENSIME is originally built for Scala, so support for java is not complete, in
 particular refactoring doesn't work.
 
+** LSP Java
+LSP Java is the Java adapter for [[https://github.com/emacs-lsp/lsp-mode][LSP Mode]] which is the Emacs client for [[https://github.com/Microsoft/language-server-protocol][Language
+Server Protocol]].
+
+*** Instalation
+Download either [[http://download.eclipse.org/jdtls/snapshots/jdt-language-server-latest.tar.gz][latest]] or [[http://download.eclipse.org/jdtls/snapshots/?d][a specific version]] of Eclipse JDT Language Server
+distribution to =~/.emacs.d/eclipse.jdt.ls/server/=
+
+If you choose to have the server installed in a different directory, set
+=lsp-java-server-install-dir=
+
+If you choose to have the server installed in a different directory, set
+=lsp-java-server-install-dir=
+On Linux/MacOS you could install/update Eclipse JDT Language Server via running the following commands:
+
+#+BEGIN_SRC bash
+  rm -rf ~/.emacs.d/eclipse.jdt.ls/server/
+  mkdir -p ~/.emacs.d/eclipse.jdt.ls/server/
+  wget http://download.eclipse.org/jdtls/snapshots/jdt-language-server-latest.tar.gz -O /tmp/jdt-latest.tar
+  tar xf /tmp/jdt-latest.tar -C ~/.emacs.d/eclipse.jdt.ls/server/
+#+END_SRC
+
+*** Configuration
+Specify the list of projects which will be imported in the LSP server. Note that
+if project is not imported JDT server will provide only basic java support due
+to lack of classpath information.
+
+#+BEGIN_SRC emacs-lisp
+(java :variables java-backend 'lsp
+                 lsp-java--workspace-folders '(list "/path/to/project1"
+                                                    "/path/to/project2"
+                                                    ...))
+#+END_SRC
+
 * Key bindings
 ** Meghanada
 *** Server
@@ -226,7 +282,7 @@ particular refactoring doesn't work.
  | ~SPC m D k~ | Kill server                                  |
  | ~SPC m D l~ | Clear server cache                           |
  | ~SPC m D p~ | Ping server                                  |
- | ~SPC m D r~ | Restarrt server                              |
+ | ~SPC m D r~ | Restart server                               |
  | ~SPC m D s~ | Start server                                 |
  | ~SPC m D u~ | Update server                                |
  | ~SPC m D v~ | Print version of the server                  |
@@ -302,17 +358,6 @@ particular refactoring doesn't work.
  |-------------+--------------|
  | ~SPC m D k~ | Kill daemon  |
  | ~SPC m D s~ | Start daemon |
-
-**** Maven
-
- | Key Binding | Description                    |
- |-------------+--------------------------------|
- | ~SPC m m i~ | Run maven clean install        |
- | ~SPC m m I~ | Run maven install              |
- | ~SPC m m p~ | Run one already goal from list |
- | ~SPC m m r~ | Run maven goals                |
- | ~SPC m m R~ | Run one maven goal             |
- | ~SPC m m t~ | Run maven test                 |
 
 **** Goto
 
@@ -424,10 +469,9 @@ particular refactoring doesn't work.
 
 *** Typecheck
 
-| Key Binding | Description                     |
-|-------------+---------------------------------|
-| ~SPC m c t~ | type check the current file     |
-| ~SPC m c T~ | type check all the open buffers |
+| Key Binding | Description                 |
+|-------------+-----------------------------|
+| ~SPC m c t~ | type check the current file |
 
 *** Debug
 
@@ -453,16 +497,13 @@ particular refactoring doesn't work.
 | Key Binding | Description                                        |
 |-------------+----------------------------------------------------|
 | ~SPC m e e~ | print error at point                               |
-| ~SPC m e l~ | show all errors and warnings                       |
 | ~SPC m e s~ | switch to buffer containing the stack trace parser |
 
 *** Goto
 
-| Key Binding | Description          |
-|-------------+----------------------|
-| ~SPC m g g~ | go to definition     |
-| ~SPC m g i~ | go to implementation |
-| ~SPC m g t~ | go to test           |
+| Key Binding | Description      |
+|-------------+------------------|
+| ~SPC m g g~ | go to definition |
 
 *** Print and yank types
 
@@ -478,9 +519,6 @@ particular refactoring doesn't work.
 |-------------+----------------------------------------|
 | ~SPC m h h~ | show documentation for symbol at point |
 | ~SPC m h u~ | show uses for symbol at point          |
-| ~SPC m i i~ | inspect type at point                  |
-| ~SPC m i I~ | inspect type in other frame            |
-| ~SPC m i p~ | inspect project package                |
 
 *** Server
 
@@ -495,7 +533,6 @@ particular refactoring doesn't work.
 | Key Binding | Description                                                          |
 |-------------+----------------------------------------------------------------------|
 | ~SPC m r a~ | add type annotation                                                  |
-| ~SPC m r f~ | format source                                                        |
 | ~SPC m r d~ | get rid of an intermediate variable (=ensime-refactor-inline-local=) |
 | ~SPC m r D~ | get rid of an intermediate variable (=ensime-undo-peek=)             |
 | ~SPC m r i~ | organize imports                                                     |
@@ -523,3 +560,58 @@ particular refactoring doesn't work.
 | ~SPC m s i~ | start or switch to the REPL inferior process                        |
 | ~SPC m s r~ | send region to the REPL                                             |
 | ~SPC m s R~ | send region to the REPL and focus the REPL buffer in =insert state= |
+
+** LSP Java
+
+| Key Binding   | Description                           |
+|---------------+---------------------------------------|
+| ~SPC m g g~   | Go to definition                      |
+| ~SPC m g r~   | Find references                       |
+| ~SPC m g R~   | Peek references using ~lsp-ui~        |
+| ~SPC m g d~   | Goto type definition                  |
+| ~SPC m g a~   | Search type in project                |
+| ~SPC m g A~   | Search type in project using ~lsp-ui~ |
+| ~SPC m h h~   | Describe thing at point               |
+| ~SPC m e l~   | List project errors/warnings          |
+| ~SPC m p u~   | Refresh user settings                 |
+| ~SPC m e a~   | Execute code action                   |
+| ~SPC m q r~   | Restart workspace                     |
+| ~SPC m r o i~ | Organize imports                      |
+| ~SPC m r r~   | Rename symbol                         |
+| ~SPC m r a i~ | Add import                            |
+| ~SPC m r a m~ | Add unimplemented methods             |
+| ~SPC m r c p~ | Create parameter                      |
+| ~SPC m r c f~ | Create field                          |
+| ~SPC m r e c~ | Extract constant                      |
+| ~SPC m r e l~ | Extract local                         |
+| ~SPC m r e m~ | Extract method                        |
+| ~SPC m c c~   | Build project                         |
+| ~SPC m a n~   | Actionable notifications              |
+| ~SPC m =~     | Format code                           |
+
+** Maven
+
+| Key Binding     | Description                                          |
+|-----------------+------------------------------------------------------|
+| ~SPC m m c c~   | Compile                                              |
+| ~SPC m m c C~   | Clean                                                |
+| ~SPC m m c r~   | Clean and compile                                    |
+| ~SPC m m g a~   | Switch between class and test file                   |
+| ~SPC m m g A~   | Switch between class and test file in another window |
+| ~SPC m m t a~   | Run all tests                                        |
+| ~SPC m m t C-a~ | Clean and run all tests                              |
+| ~SPC m m t b~   | Run current buffer tests                             |
+| ~SPC m m t i~   | Test and install                                     |
+| ~SPC m m t t~   | Run a specific test                                  |
+
+** Gradle
+
+| Key Binding   | Description              |
+|---------------+--------------------------|
+| ~SPC m l c c~ | Compile                  |
+| ~SPC m l c C~ | Clean                    |
+| ~SPC m l c r~ | Clean and compile        |
+| ~SPC m l t a~ | Run all tests            |
+| ~SPC m l t b~ | Run current buffer tests |
+| ~SPC m l t t~ | Run a specific test      |
+| ~SPC m l x~   | Execute a Gradle task    |

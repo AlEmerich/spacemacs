@@ -1,6 +1,6 @@
 ;;; packages.el --- Java Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Lukasz Klich <klich.lukasz@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -23,9 +23,14 @@
         flyspell
         ggtags
         gradle-mode
+        counsel-gtags
         helm-gtags
         (java-mode :location built-in)
+        maven-test-mode
         (meghanada :toggle (not (version< emacs-version "25.1")))
+        mvn
+        (lsp-java :requires lsp-mode lsp-ui company-lsp)
+        org
         ))
 
 (defun java/post-init-company ()
@@ -64,7 +69,6 @@
                         ("mg" . "goto")
                         ("mh" . "help/doc")
                         ("mi" . "issues")
-                        ("mm" . "maven")
                         ("mp" . "project")
                         ("mr" . "refactor")
                         ("mt" . "test")))
@@ -80,7 +84,7 @@
         "Dk" 'stop-eclimd
         "Ds" 'start-eclimd
         ;; errors (problems)
-        "ee" 'eclim-problems-correct
+        "Ee" 'eclim-problems-correct
         ;; find
         "ff" 'eclim-java-find-generic
         ;; goto
@@ -90,13 +94,6 @@
         "hh" 'eclim-java-show-documentation-for-current-element
         "hi" 'eclim-java-hierarchy
         "hu" 'eclim-java-find-references
-        ;; maven
-        "mi" 'spacemacs/java-maven-clean-install
-        "mI" 'spacemacs/java-maven-install
-        "mp" 'eclim-maven-lifecycle-phases
-        "mr" 'eclim-maven-run
-        "mR" 'eclim-maven-lifecycle-phase-run
-        "mt" 'spacemacs/java-maven-test
         ;; project
         "pb" 'eclim-project-build
         "pc" 'eclim-project-create
@@ -182,7 +179,7 @@
                           ("mc" . "check")
                           ("md" . "debug")
                           ("mD" . "daemon")
-                          ("me" . "errors")
+                          ("mE" . "errors")
                           ("mg" . "goto")
                           ("mh" . "docs")
                           ("mi" . "inspect")
@@ -202,7 +199,6 @@
           "br"     'ensime-sbt-do-run
 
           "ct"     'ensime-typecheck-current-buffer
-          "cT"     'ensime-typecheck-all
 
           "dA"     'ensime-db-attach
           "db"     'ensime-db-set-break
@@ -221,27 +217,19 @@
           "Dr"     'spacemacs/ensime-gen-and-restart
           "Ds"     'ensime
 
-          "ee"     'ensime-print-errors-at-point
-          "el"     'ensime-show-all-errors-and-warnings
-          "es"     'ensime-stacktrace-switch
+          "Ee"     'ensime-print-errors-at-point
+          "Es"     'ensime-stacktrace-switch
 
           "gp"     'ensime-pop-find-definition-stack
-          "gi"     'ensime-goto-impl
-          "gt"     'ensime-goto-test
 
           "hh"     'ensime-show-doc-for-symbol-at-point
           "hT"     'ensime-type-at-point-full-name
           "ht"     'ensime-type-at-point
           "hu"     'ensime-show-uses-of-symbol-at-point
 
-          "ii"     'ensime-inspect-type-at-point
-          "iI"     'ensime-inspect-type-at-point-other-frame
-          "ip"     'ensime-inspect-project-package
-
           "ra"     'ensime-refactor-add-type-annotation
           "rd"     'ensime-refactor-diff-inline-local
           "rD"     'ensime-undo-peek
-          "rf"     'ensime-format-source
           "ri"     'ensime-refactor-diff-organize-imports
           "rm"     'ensime-refactor-diff-extract-method
           "rr"     'ensime-refactor-diff-rename
@@ -301,7 +289,7 @@
 ;;       (progn
 ;;         (spacemacs//ensime-init 'java-mode t nil)
 ;;         (when (configuration-layer/package-used-p 'company)
-;;           (push 'ensime-company company-backends-java-mode)))
+;;           (add-to-list 'company-backends-java-mode 'ensime-company)))
 ;;       :config
 ;;       (progn
 ;;         (spacemacs/ensime-configure-keybindings 'java-mode)))))
@@ -323,10 +311,40 @@
 
 (defun java/init-gradle-mode ()
   (use-package gradle-mode
-    :defer t))
+    :defer t
+    :init
+    (progn
+      (when (configuration-layer/package-used-p 'groovy-mode)
+        (add-hook 'groovy-mode-hook 'gradle-mode)
+        (spacemacs/declare-prefix-for-mode 'groovy-mode "ml" "gradle")
+        (spacemacs/declare-prefix-for-mode 'groovy-mode "mc" "compile")
+        (spacemacs/declare-prefix-for-mode 'groovy-mode "mlt" "tests"))
+      (when (configuration-layer/package-used-p 'java-mode)
+        (add-hook 'java-mode-hook 'gradle-mode)
+        (spacemacs/declare-prefix-for-mode 'java-mode "ml" "gradle")
+        (spacemacs/declare-prefix-for-mode 'groovy-mode "mc" "compile")
+        (spacemacs/declare-prefix-for-mode 'java-mode "mlt" "tests")))
+    :config
+    (progn
+      (spacemacs|hide-lighter gradle-mode)
+      (spacemacs/set-leader-keys-for-minor-mode 'gradle-mode
+        "lcc" 'gradle-build
+        "lcC" 'spacemacs/gradle-clean
+        "lcr" 'spacemacs/gradle-clean-build
+        "lta" 'gradle-test
+        "ltb" 'spacemacs/gradle-test-buffer
+        "ltt" 'gradle-single-test
+        "lx" 'gradle-execute))))
+
+(defun java/post-init-counsel-gtags ()
+  (spacemacs/counsel-gtags-define-keys-for-mode 'java-mode))
 
 (defun java/post-init-helm-gtags ()
   (spacemacs/helm-gtags-define-keys-for-mode 'java-mode))
+
+(defun java/pre-init-org ()
+  (spacemacs|use-package-add-hook org
+    :post-config (add-to-list 'org-babel-load-languages '(java . t))))
 
 (defun java/init-java-mode ()
   (use-package java-mode
@@ -336,6 +354,27 @@
       (add-hook 'java-mode-local-vars-hook #'spacemacs//java-setup-backend)
       (put 'java-backend 'safe-local-variable 'symbolp)
       (spacemacs//java-define-command-prefixes))))
+
+(defun java/init-maven-test-mode ()
+  (use-package maven-test-mode
+    :defer t
+    :init
+    (when (configuration-layer/package-used-p 'java-mode)
+      (add-hook 'java-mode-hook 'maven-test-mode)
+      (spacemacs/declare-prefix-for-mode 'java-mode "mm" "maven")
+      (spacemacs/declare-prefix-for-mode 'java-mode "mmg" "goto")
+      (spacemacs/declare-prefix-for-mode 'java-mode "mmt" "tests"))
+    :config
+    (progn
+      (spacemacs|hide-lighter maven-test-mode)
+      (spacemacs/set-leader-keys-for-minor-mode 'maven-test-mode
+        "mga"  'maven-test-toggle-between-test-and-class
+        "mgA"  'maven-test-toggle-between-test-and-class-other-window
+        "mta"   'maven-test-all
+        "mtC-a" 'maven-test-clean-test-all
+        "mtb"   'maven-test-file
+        "mti"   'maven-test-install
+        "mtt"   'maven-test-method))))
 
 (defun java/init-meghanada ()
   (use-package meghanada
@@ -389,3 +428,55 @@
         ;; meghanada-local-variable
 
         "x:" 'meghanada-run-task))))
+
+(defun java/init-lsp-java ()
+  (use-package lsp-java
+    :defer t
+    :config
+    (progn
+      ;; key bindings
+      (dolist (prefix '(("mc" . "compile")
+                        ("mg" . "goto")
+                        ("mr" . "refactor")
+                        ("mq" . "lsp")))
+      (spacemacs/set-leader-keys-for-major-mode 'java-mode
+        "gg"  'xref-find-definitions
+        "gr"  'xref-find-references
+        "gR"  'lsp-ui-peek-find-references
+        "ga"  'xref-find-apropos
+        "gA"  'lsp-ui-peek-find-workspace-symbol
+        "gd"  'lsp-goto-type-definition
+        "hh"  'lsp-describe-thing-at-point
+        "el"  'lsp-ui-flycheck-list
+        "pu"  'lsp-java-update-user-settings
+        "ea"  'lsp-execute-code-action
+        "qr"  'lsp-restart-workspace
+        "roi" 'lsp-java-organize-imports
+        "rr" 'lsp-rename
+        "rai" 'lsp-java-add-import
+        "ram" 'lsp-java-add-unimplemented-methods
+        "rcp" 'lsp-java-create-parameter
+        "rcf" 'lsp-java-create-field
+        "rec" 'lsp-java-extract-to-constant
+        "rel" 'lsp-java-extract-to-local-variable
+        "rem" 'lsp-java-extract-method
+        "cc"  'lsp-java-build-project
+        "an"  'lsp-java-actionable-notifications
+        "="   'lsp-format-buffer)
+
+      (setq lsp-highlight-symbol-at-point nil
+            lsp-ui-sideline-update-mode 'point
+            lsp-eldoc-render-all nil
+            lsp-java-completion-guess-arguments t)))))
+
+(defun java/init-mvn ()
+  (use-package mvn
+    :defer t
+    :init
+    (when (configuration-layer/package-used-p 'java-mode)
+      (spacemacs/declare-prefix-for-mode 'java-mode "mm" "maven")
+      (spacemacs/declare-prefix-for-mode 'java-mode "mmc" "compile")
+      (spacemacs/set-leader-keys-for-major-mode 'java-mode
+        "mcc" 'mvn-compile
+        "mcC" 'mvn-clean
+        "mcr" 'spacemacs/mvn-clean-compile))))

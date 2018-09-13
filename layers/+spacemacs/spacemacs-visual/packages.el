@@ -1,6 +1,6 @@
 ;;; packages.el --- Spacemacs UI Visual Layer packages File
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -30,7 +30,7 @@
     :init
     (setq desktop-dirname spacemacs-cache-directory)
     :config
-    (push spacemacs-cache-directory desktop-path)))
+    (add-to-list 'desktop-path spacemacs-cache-directory)))
 
 (defun spacemacs-visual/init-fill-column-indicator ()
   (use-package fill-column-indicator
@@ -38,10 +38,9 @@
     :init
     (progn
       (setq fci-rule-width 1)
-      (setq fci-rule-color "#D0BF8F")
       ;; manually register the minor mode since it does not define any
       ;; lighter
-      (push '(fci-mode "") minor-mode-alist)
+      (add-to-list 'minor-mode-alist '(fci-mode ""))
       (spacemacs|add-toggle fill-column-indicator
         :status fci-mode
         :on (turn-on-fci-mode)
@@ -72,6 +71,7 @@
 
       ;; buffers that we manage
       (push '("*Help*"                 :dedicated t :position bottom :stick t :noselect t   :height 0.4) popwin:special-display-config)
+      (push '("*Process List*"         :dedicated t :position bottom :stick t :noselect nil :height 0.4) popwin:special-display-config)
       (push '("*compilation*"          :dedicated t :position bottom :stick t :noselect t   :height 0.4) popwin:special-display-config)
       (push '("*Shell Command Output*" :dedicated t :position bottom :stick t :noselect nil            ) popwin:special-display-config)
       (push '("*Async Shell Command*"  :dedicated t :position bottom :stick t :noselect nil            ) popwin:special-display-config)
@@ -80,7 +80,8 @@
       (push '("*ert*"                  :dedicated t :position bottom :stick t :noselect nil            ) popwin:special-display-config)
       (push '("*grep*"                 :dedicated t :position bottom :stick t :noselect nil            ) popwin:special-display-config)
       (push '("*nosetests*"            :dedicated t :position bottom :stick t :noselect nil            ) popwin:special-display-config)
-      (push '("^\*WoMan.+\*$" :regexp t             :position bottom                                   ) popwin:special-display-config))))
+      (push '("^\*WoMan.+\*$" :regexp t             :position bottom                                   ) popwin:special-display-config)
+      (push '("*Google Translate*"     :dedicated t :position bottom :stick t :noselect t   :height 0.4) popwin:special-display-config))))
 
 (defun spacemacs-visual/init-zoom-frm ()
   (use-package zoom-frm

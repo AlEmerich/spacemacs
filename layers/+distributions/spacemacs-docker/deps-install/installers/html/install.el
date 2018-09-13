@@ -1,7 +1,7 @@
 #!/usr/bin/emacs --script
 ;;; install.el --- html layer dependencies installation script
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Eugene "JAremko" Yaremenko <w3techplayground@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -17,7 +17,7 @@
 (with-installed (git curl software-properties-common)
   ($ "add-apt-repository ppa:brightbox/ruby-ng"
      "apt-get update")
-  (install ruby ruby-dev ruby2.0-dev ruby2.2-dev npm)
+  (install ruby ruby-all-dev npm)
   (!"Installing npm stuff...")
   ($ "npm cache clean -f"
      "npm install -g n"

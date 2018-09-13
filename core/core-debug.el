@@ -1,6 +1,6 @@
 ;;; core-debug.el --- Spacemacs Core File  -*- lexical-binding: t; -*-
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -135,7 +135,7 @@ seconds to load")
     (advice-add 'require :around #'spacemacs//load-timer)
     (advice-add 'package-initialize
                 :around
-                (spacemacs||make-function-timer package-intialize))
+                (spacemacs||make-function-timer package-initialize))
     (advice-add 'configuration-layer/load
                 :around
                 (spacemacs||make-function-timer configuration-layer/load))
@@ -195,7 +195,7 @@ seconds to load")
 
 (defun spacemacs//describe-last-keys-string ()
   "Gathers info about your Emacs last keys and returns it as a string."
-  (loop
+  (cl-loop
    for key
    across (recent-keys)
    collect (if (or (integerp key) (symbolp key) (listp key))
@@ -258,7 +258,7 @@ seconds to load")
       (overlay-put ov 'after-string prop-val))
     (insert-file-contents
      (concat configuration-layer-template-directory "REPORTING.template"))
-    (loop
+    (cl-loop
      for (placeholder replacement)
      in `(("%SYSTEM_INFO%" ,system-info)
           ("%BACKTRACE%" ,backtrace)
@@ -267,7 +267,16 @@ seconds to load")
           (goto-char (point-min))
           (search-forward placeholder)
           (replace-match replacement [keep-case] [literal])))
+    (set-buffer-modified-p nil)
     (spacemacs/report-issue-mode)))
+
+(defun spacemacs//report-issue-kill-buffer-query ()
+  "Check if issue has been edited when buffer is about to be
+  killed. Intended to be used with
+  `kill-buffer-query-functions'"
+  (if (buffer-modified-p)
+      (y-or-n-p "Issue has unsaved changes, kill buffer anyways? ")
+    t))
 
 (define-derived-mode spacemacs/report-issue-mode text-mode "Report-Issue"
   "Major mode for reporting issues with Spacemacs.
@@ -279,7 +288,10 @@ that the issue has been created successfully, you can close this buffer.
 \\{spacemacs/report-issue-mode-map}
 "
   (font-lock-add-keywords 'spacemacs/report-issue-mode
-                          '(("\\(<<.*?>>\\)" . 'font-lock-comment-face))))
+                          '(("\\(<<.*?>>\\)" . 'font-lock-comment-face)))
+  (add-hook 'kill-buffer-query-functions
+            'spacemacs//report-issue-kill-buffer-query
+            nil t))
 
 (define-key spacemacs/report-issue-mode-map
   (kbd "C-c C-c") 'spacemacs//report-issue-done)

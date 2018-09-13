@@ -1,6 +1,6 @@
 ;;; packages.el --- Github Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -15,8 +15,7 @@
         github-clone
         github-search
         magit-gh-pulls
-        ;; disabled for now, waiting for the new implementation of the project
-        ;; magithub
+        magithub
         ;; this package does not exits, we need it to wrap
         ;; the call to spacemacs/declare-prefix.
         (spacemacs-github :location built-in)
@@ -70,23 +69,31 @@
 ;; To avoid errors, magit-gh-pulls must be loaded after magit, but before magit
 ;; is configured by spacemacs.
 
-(defun github/init-magit-gh-pulls ()
+(defun github/pre-init-magit-gh-pulls ()
   (spacemacs|use-package-add-hook magit
     :pre-config
     (progn
       (use-package magit-gh-pulls
-        :init (define-key magit-mode-map "#" 'spacemacs/load-gh-pulls-mode)
         :config
+        (define-key magit-mode-map "#" 'spacemacs/load-gh-pulls-mode)
         (spacemacs|diminish magit-gh-pulls-mode "Github-PR")))))
+(defun github/init-magit-gh-pulls ())
 
 (defun github/init-magithub ()
   (use-package magithub
-    :defer t
     :after magit
     :init
     (setq magithub-dir (concat spacemacs-cache-directory "magithub/"))
     :config
     (progn
+      ;; Configure Magithub to be offline by default because loading data from
+      ;; projects with many pull requests or issues can be exorbitantly slow.
+      ;; See <https://github.com/syl20bnr/spacemacs/issues/11176>.
+      (when (null (magit-get "--global" "magithub.online"))
+        (magit-set "false" "--global" "magithub.online")
+        (magit-set "false" "--global" "magithub.status.includeStatusHeader")
+        (magit-set "false" "--global" "magithub.status.includePullRequestsSection")
+        (magit-set "false" "--global" "magithub.status.includeIssuesSection"))
       (magithub-feature-autoinject t)
       (define-key magit-status-mode-map "@" #'magithub-dispatch-popup))))
 

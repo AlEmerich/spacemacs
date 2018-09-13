@@ -1,6 +1,6 @@
 ;;; packages.el --- Chinese Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -21,6 +21,7 @@
         pangu-spacing
         org
         (youdao-dictionary :toggle chinese-enable-youdao-dict)
+        chinese-conv
         ))
 
 (defun chinese/init-fcitx ()
@@ -93,6 +94,10 @@
                  (add-hook 'org-mode-hook
                            '(lambda ()
                               (set (make-local-variable 'pangu-spacing-real-insert-separtor) t))))))
+
+(defun chinese/init-chinese-conv ()
+  (use-package chinese-conv
+    :defer t))
 
 (defun chinese/post-init-org ()
   (defadvice org-html-paragraph (before org-html-paragraph-advice

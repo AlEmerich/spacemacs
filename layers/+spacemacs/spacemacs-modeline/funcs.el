@@ -1,6 +1,6 @@
 ;;; funcs.el --- Spacemacs Mode-line Layer functions File
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -8,6 +8,26 @@
 ;; This file is not part of GNU Emacs.
 ;;
 ;;; License: GPLv3
+
+(defun spacemacs/get-mode-line-theme-name ()
+  "Return the mode-line theme name."
+  (if (listp dotspacemacs-mode-line-theme)
+      (car dotspacemacs-mode-line-theme)
+    dotspacemacs-mode-line-theme))
+
+(defun spacemacs/mode-line-separator ()
+  "Return the separator type for the mode-line.
+Return nil if no separator is defined."
+  (when (listp dotspacemacs-mode-line-theme)
+    (plist-get (cdr dotspacemacs-mode-line-theme) :separator)))
+
+(defun spacemacs/mode-line-separator-scale ()
+  "Return the separator scale for the mode-line.
+Return nil if no scale is defined."
+  (if (eq 'utf-8 (spacemacs/mode-line-separator))
+      1
+    (when (listp dotspacemacs-mode-line-theme)
+      (plist-get (cdr dotspacemacs-mode-line-theme) :separator-scale))))
 
 
 ;; spaceline
@@ -29,12 +49,10 @@
     (powerline-set-selected-window)
     (powerline-reset)))
 
-(defun spacemacs//set-powerline-for-startup-buffers ()
-  "Set the powerline for buffers created when Emacs starts."
-  (dolist (buffer '("*Messages*" "*spacemacs*" "*Compile-Log*"))
-    (when (and (get-buffer buffer)
-               (configuration-layer/package-used-p 'spaceline))
-      (spacemacs//restore-powerline buffer))))
+(defun spacemacs//restore-buffers-powerline ()
+  "Restore the powerline in all buffers."
+  (dolist (buffer (buffer-list))
+    (spacemacs//restore-powerline buffer)))
 
 (defun spacemacs//prepare-diminish ()
   (when spaceline-minor-modes-p
@@ -51,3 +69,15 @@
                             unicode
                           (if ascii ascii unicode))))
               (diminish mode dim))))))))
+
+
+;; Vim powerline
+
+(defun spacemacs//set-vimish-powerline-for-startup-buffers ()
+  "Set the powerline for buffers created when Emacs starts."
+  (dolist (buffer '("*Messages*" "*spacemacs*" "*Compile-Log*"))
+    (when (get-buffer buffer)
+      (with-current-buffer buffer
+        (setq-local mode-line-format (default-value 'mode-line-format))
+        (powerline-set-selected-window)
+        (powerline-reset)))))

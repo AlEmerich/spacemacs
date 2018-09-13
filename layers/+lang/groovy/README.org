@@ -7,10 +7,11 @@
   - [[#features][Features:]]
 - [[#install][Install]]
 - [[#key-bindings][Key bindings]]
+  - [[#imports][Imports]]
   - [[#repl][REPL]]
 
 * Description
-This layer supports [[http://www.groovy-lang.org/][groovy]] development in Spacemacs.
+This layer supports [[http://www.groovy-lang.org/][Groovy]] development in Spacemacs.
 
 ** Features:
 - Basic dabbrev auto-completion with company
@@ -23,6 +24,12 @@ add =groovy= to the existing =dotspacemacs-configuration-layers= list in this
 file.
 
 * Key bindings
+** Imports
+
+| Key Binding | Description                        |
+|-------------+------------------------------------|
+| ~SPC m r i~ | Add import for symbol around point |
+
 ** REPL
 
 | Key Binding | Description                                           |

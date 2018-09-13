@@ -4,6 +4,7 @@
 
 * Table of Contents                                         :TOC_4_gh:noexport:
 - [[#description][Description]]
+  - [[#features][Features:]]
 - [[#layer-installation][Layer Installation]]
 - [[#ensime][Ensime]]
 - [[#scalastyle][Scalastyle]]
@@ -15,8 +16,20 @@
 - [[#key-bindings][Key bindings]]
 
 * Description
-This layer adds support for the Scala language using the excellent [[http://ensime.org/][ENSIME]]
-client/server.
+This layer adds support for the Scala language to Spacemacs.
+
+** Features:
+- Syntax highlighting
+- Auto-completion
+- Syntax-checking
+- Refactoring
+- Incremental compilation
+- Scala Repl
+- Style linting
+- Eldoc integration
+- Test execution directly from emacs
+- Automatic replacement of ASCII arrows with unicode ones
+- Automatic starting/stopping of [[https://ensime.github.io/][ENSIME]] IDE server
 
 * Layer Installation
 To use this configuration layer, add it to your =~/.spacemacs=. You will need to
@@ -25,17 +38,19 @@ file.
 
 Then, you should modify your =~/.spacemacs= to use the recommended Ensime
 version (Stable). Please add the following lines to =dotspacemacs/user-init=:
+
 #+BEGIN_SRC emacs-lisp
-  (push '("melpa-stable" . "stable.melpa.org/packages/") configuration-layer-elpa-archives)
-  (push '(ensime . "melpa-stable") package-pinned-packages)
+  (add-to-list 'configuration-layer-elpa-archives '("melpa-stable" . "stable.melpa.org/packages/"))
+  (add-to-list 'package-pinned-packages '(ensime . "melpa-stable"))
 #+END_SRC
 
 * Ensime
-[[http://ensime.org/][ENSIME]] provides IDE-like features, such as refactoring, incremental compilation
+[[https://ensime.github.io/][ENSIME]] provides IDE-like features, such as refactoring, incremental compilation
 and project-wide type-checking.
 
 ENSIME requires a configuration file at the root of each Scala project. It
-provides an SBT plugin to generate these files.
+provides an SBT plugin, a gradle plugin and others (see [[https://ensime.github.io/build_tools/][ensime.org]] for a full
+list) to generate these files.
 
 Installation instructions and usage can be found in the =Java= layer
 [[https://github.com/syl20bnr/spacemacs/tree/develop/layers/%2Blang/java/README.org#ensime][README.org]].
@@ -51,6 +66,7 @@ To use scalastyle, it must be present as an executable in your =PATH=.
 
 To test if =scalastyle= executable is in your path, run =scalastyle= in a new
 terminal, it should output something like:
+
 #+BEGIN_SRC bash
 $ scalastyle
 scalastyle 0.8.0
@@ -60,6 +76,7 @@ Usage: scalastyle [options] <source directory>
 
 Finally, enable the =syntax-checking= layer and set the =flycheck-scalastylerc=
 variable to a valid location.
+
 #+BEGIN_SRC emacs-lisp
   (setq-default flycheck-scalastylerc "/usr/local/etc/scalastyle_config.xml")
 #+END_SRC

@@ -1,6 +1,6 @@
 ;;; packages.el --- shell packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -117,18 +117,12 @@
 
       ;; Visual commands
       (require 'em-term)
-      (mapc (lambda (x) (push x eshell-visual-commands))
+      (mapc (lambda (x) (add-to-list 'eshell-visual-commands x))
             '("el" "elinks" "htop" "less" "ssh" "tmux" "top"))
 
       ;; automatically truncate buffer after output
       (when (boundp 'eshell-output-filter-functions)
-        (push 'eshell-truncate-buffer eshell-output-filter-functions))
-
-      ;; These don't work well in normal state
-      ;; due to evil/emacs cursor incompatibility
-      (evil-define-key 'insert eshell-mode-map
-        (kbd "C-k") 'eshell-previous-matching-input-from-input
-        (kbd "C-j") 'eshell-next-matching-input-from-input))))
+        (add-hook 'eshell-output-filter-functions #'eshell-truncate-buffer)))))
 
 (defun shell/init-eshell-prompt-extras ()
   (use-package eshell-prompt-extras

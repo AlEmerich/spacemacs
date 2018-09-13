@@ -1,7 +1,7 @@
 #!/usr/bin/emacs --script
 ;;; install.el --- go layer dependencies installation script
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Eugene "JAremko" Yaremenko <w3techplayground@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -14,7 +14,7 @@
                         (file-name-directory
                          load-file-name)) nil t)
 
-(let ((go-version "1.9"))
+(let ((go-version "1.10"))
   (with-build-dir (tgp "/tmp/gopath")
     (with-installed (tar gzip wget)
       ($ `("wget https://storage.googleapis.com/golang/go%s.linux-amd64.tar.gz"

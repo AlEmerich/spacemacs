@@ -1,6 +1,6 @@
 ;;; packages.el --- Spacemacs Editing Visual Layer packages File
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -12,9 +12,9 @@
 (setq spacemacs-editing-visual-packages
       '(
         ;; default
-        adaptive-wrap
+        (centered-buffer-mode :location local)
         column-enforce-mode
-        hide-comnt
+        (hide-comnt :location local)
         highlight-indentation
         highlight-numbers
         highlight-parentheses
@@ -28,11 +28,7 @@
 
 ;; Initialization of packages
 
-(defun spacemacs-editing-visual/init-adaptive-wrap ()
-  (use-package adaptive-wrap
-    :config
-    (progn
-      (add-hook 'visual-line-mode-hook 'adaptive-wrap-prefix-mode))))
+(defun spacemacs-editing-visual/init-centered-buffer-mode ())
 
 (defun spacemacs-editing-visual/init-column-enforce-mode ()
   (use-package column-enforce-mode
@@ -149,8 +145,10 @@
 
 (defun spacemacs-editing-visual/init-volatile-highlights ()
   (use-package volatile-highlights
+    :defer (spacemacs/defer 2)
     :config
     (progn
+      (require 'volatile-highlights)
       ;; additional extensions
       ;; evil
       (vhl/define-extension 'evil

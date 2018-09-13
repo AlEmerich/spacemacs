@@ -1,6 +1,6 @@
 ;;; packages.el --- cfengine layer packages file for Spacemacs.
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Nick Anderson <nick@cmdln.org>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -33,7 +33,7 @@
   (add-hook 'cfengine3-mode-hook 'eldoc-mode))
 
 (defun cfengine/post-init-flycheck ()
-  (spacemacs/enable-flycheck 'cfengine3-mode-hook))
+  (spacemacs/enable-flycheck 'cfengine3-mode))
 
 (defun cfengine/init-ob-cfengine3 ()
   (use-package ob-cfengine3

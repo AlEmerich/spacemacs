@@ -1,6 +1,6 @@
 ;;; funcs.el --- Haskell Layer funcs File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -52,7 +52,7 @@
   (spacemacs|add-company-backends
     :backends (dante-company company-dabbrev-code company-yasnippet)
     :modes haskell-mode)
-  (push 'xref-find-definitions spacemacs-jump-handlers)
+  (add-to-list 'spacemacs-jump-handlers 'xref-find-definitions)
   (dante-mode)
   (dolist (mode haskell-modes)
     (spacemacs/set-leader-keys-for-major-mode mode
@@ -68,10 +68,11 @@
   (spacemacs|add-company-backends
     :backends (company-intero company-dabbrev-code company-yasnippet)
     :modes haskell-mode)
-  (push 'intero-goto-definition spacemacs-jump-handlers)
+  (add-to-list 'spacemacs-jump-handlers 'intero-goto-definition)
   (intero-mode)
   (dolist (mode haskell-modes)
     (spacemacs/set-leader-keys-for-major-mode mode
+      "gb" 'xref-pop-marker-stack
       "hi" 'intero-info
       "ht" 'intero-type-at
       "hT" 'haskell-intero/insert-type
@@ -81,8 +82,8 @@
   (dolist (mode (cons 'haskell-cabal-mode haskell-modes))
     (spacemacs/set-leader-keys-for-major-mode mode
       "sc"  nil
-      "ss"  'haskell-intero/display-repl
-      "sS"  'haskell-intero/pop-to-repl))
+      "sS"  'haskell-intero/display-repl
+      "ss"  'haskell-intero/pop-to-repl))
 
   (dolist (mode (append haskell-modes '(haskell-cabal-mode intero-repl-mode)))
     (spacemacs/declare-prefix-for-mode mode "mi" "haskell/intero")
@@ -103,6 +104,13 @@
   (if (fboundp 'electric-indent-local-mode)
       (electric-indent-local-mode -1)))
 
+(defun spacemacs/haskell-format-imports ()
+  "Sort and align import statements from anywhere in the source file."
+  (interactive)
+  (save-excursion
+    (haskell-navigate-imports)
+    (haskell-mode-format-imports)))
+
 ;; Dante Functions
 
 (defun spacemacs-haskell//dante-insert-type ()
@@ -118,13 +126,13 @@
 
 (defun haskell-intero/display-repl (&optional prompt-options)
   (interactive "P")
-  (let ((buffer (intero-repl-buffer prompt-options)))
+  (let ((buffer (intero-repl-buffer prompt-options t)))
     (unless (get-buffer-window buffer 'visible)
       (display-buffer buffer))))
 
 (defun haskell-intero/pop-to-repl (&optional prompt-options)
   (interactive "P")
-  (pop-to-buffer (intero-repl-buffer prompt-options)))
+  (pop-to-buffer (intero-repl-buffer prompt-options t)))
 
 (defun haskell-intero//preserve-focus (f &rest args)
   (let ((buffer (current-buffer)))

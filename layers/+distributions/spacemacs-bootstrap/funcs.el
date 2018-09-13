@@ -1,6 +1,6 @@
 ;;; funcs.el --- Spacemacs Bootstrap Layer functions File
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -8,6 +8,7 @@
 ;; This file is not part of GNU Emacs.
 ;;
 ;;; License: GPLv3
+
 
 
 
@@ -36,17 +37,31 @@
 
 (defun spacemacs/add-evil-cursor (state color shape)
   "Define a cursor and face for a new evil state.
-An appropriate entry is added to `spacemacs-evil-cursors', as well."
+An appropriate entry is added to `spacemacs-evil-cursors', as well.
+
+For evil states that do not need an evil cursor use
+`spacemacs/define-evil-state-face' instead."
   (add-to-list 'spacemacs-evil-cursors (list state color shape))
+  (spacemacs/define-evil-state-face state color)
+  (set (intern (format "evil-%s-state-cursor" state))
+       (list (when dotspacemacs-colorize-cursor-according-to-state color)
+             shape)))
+
+(defun spacemacs/define-evil-state-face (state color)
+  "Define a face for an evil state.
+For evil states that also need an entry to `spacemacs-evil-cursors' use
+`spacemacs/add-evil-cursor' instead."
+  ;; this function and `spacemacs/add-evil-cursor' need to be separate because
+  ;; some states must explicitly *not* have their own evil spacemacs cursor
+  ;; for example treemacs: it needs no cursor since it solely uses hl-line-mode
+  ;; and having an evil cursor defined anyway leads to the cursor sometimes
+  ;; visibly flashing in treemacs buffers
   (eval `(defface ,(intern (format "spacemacs-%s-face" state))
            `((t (:background ,color
                              :foreground ,(face-background 'mode-line)
                              :inherit 'mode-line)))
            (format "%s state face." state)
-           :group 'spacemacs))
-  (set (intern (format "evil-%s-state-cursor" state))
-       (list (when dotspacemacs-colorize-cursor-according-to-state color)
-             shape)))
+           :group 'spacemacs)))
 
 (defun spacemacs/set-state-faces ()
   (cl-loop for (state color cursor) in spacemacs-evil-cursors
@@ -63,7 +78,7 @@ An appropriate entry is added to `spacemacs-evil-cursors', as well."
   (cond
    ((or (eq 'vim style)
         (and (eq 'hybrid style)
-             (bound-and-true-p hybrid-mode-use-evil-search-module)))
+             (bound-and-true-p hybrid-style-use-evil-search-module)))
     ;; if Evil is loaded already, just setting `evil-search-module' isn't
     ;; enough, we need to call `evil-select-search-module' as well (this is done
     ;; automatically when `evil-search-module' is changed via customize)
@@ -74,6 +89,11 @@ An appropriate entry is added to `spacemacs-evil-cursors', as well."
     (if (featurep 'evil-search)
         (evil-select-search-module 'evil-search-module 'isearch)
       (setq-default evil-search-module 'isearch)))))
+
+(defun spacemacs/evil-search-clear-highlight ()
+  "Clear evil-search or evil-ex-search persistent highlights."
+  (interactive)
+  (evil-ex-nohighlight)) ; `/' highlights
 
 (defun spacemacs/evil-smart-doc-lookup ()
   "Run documentation lookup command specific to the major mode.
@@ -117,11 +137,11 @@ the boundaries of the text object."
                                           ,(regexp-quote start)
                                           ,(regexp-quote end))
      (with-eval-after-load 'evil-surround
-       (push (cons (string-to-char ,key)
-                   (if ,end
-                       (cons ,start ,end)
-                     ,start))
-             evil-surround-pairs-alist))))
+       (add-to-list 'evil-surround-pairs-alist
+                    (cons (string-to-char ,key)
+                          (if ,end
+                              (cons ,start ,end)
+                            ,start))))))
 
 (defmacro spacemacs|define-text-object-regexp (key name start-regexp end-regexp)
   "Define a text object.

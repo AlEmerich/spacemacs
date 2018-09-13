@@ -1,6 +1,6 @@
 ;;; packages.el --- elm Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -13,6 +13,7 @@
     '(
       company
       elm-mode
+      elm-test-runner
       flycheck
       (flycheck-elm :requires flycheck)
       popwin
@@ -48,8 +49,6 @@
       (add-hook 'elm-mode-hook 'spacemacs/init-elm-mode))
     :config
     (progn
-      (push "\\*elm\\*" spacemacs-useful-buffers-regexp)
-
       (spacemacs/set-leader-keys-for-major-mode 'elm-mode
         ;; format
         "=b" 'elm-mode-format-buffer
@@ -93,6 +92,21 @@
         "u" 'elm-package-unmark
         "x" 'elm-package-install
         "q" 'quit-window))))
+
+(defun elm/init-elm-test-runner ()
+  (use-package elm-test-runner
+    :after elm-mode
+    :init
+    (progn
+      (spacemacs/declare-prefix-for-mode 'elm-mode "mt" "test")
+      (spacemacs/set-leader-keys-for-major-mode 'elm-mode
+        "tb" 'elm-test-runner-run
+        "td" 'elm-test-runner-run-directory
+        "tp" 'elm-test-runner-run-project
+        "tr" 'elm-test-runner-rerun
+        "tw" 'elm-test-runner-watch
+        "t TAB" 'elm-test-runner-toggle-test-and-target
+        ))))
 
 (defun elm/pre-init-popwin ()
   (spacemacs|use-package-add-hook popwin

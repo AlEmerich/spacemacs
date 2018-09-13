@@ -1,6 +1,6 @@
 ;;; packages.el --- Groovy Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -22,7 +22,12 @@
 
 (defun groovy/init-groovy-imports ()
   (use-package groovy-imports
-    :defer t))
+    :defer t
+    :init
+    (progn
+      (add-hook 'groovy-mode-hook 'groovy-imports-scan-file)
+      (spacemacs/set-leader-keys-for-major-mode 'groovy-mode
+        "ri" 'groovy-imports-add-import-dwim))))
 
 (defun groovy/init-groovy-mode ()
   (use-package groovy-mode

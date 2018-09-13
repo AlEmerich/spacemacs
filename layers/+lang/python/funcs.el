@@ -1,6 +1,6 @@
 ;;; funcs.el --- Python Layer functions File for Spacemacs
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -9,11 +9,93 @@
 ;;
 ;;; License: GPLv3
 
+(defun spacemacs//python-setup-backend ()
+  "Conditionally setup python backend."
+  (pcase python-backend
+    (`anaconda (spacemacs//python-setup-anaconda))
+    (`lsp (spacemacs//python-setup-lsp))))
+
+(defun spacemacs//python-setup-company ()
+  "Conditionally setup company based on backend."
+  (pcase python-backend
+    (`anaconda (spacemacs//python-setup-anaconda-company))
+    (`lsp (spacemacs//python-setup-lsp-company))))
+
+(defun spacemacs//python-setup-eldoc ()
+  "Conditionally setup eldoc based on backend."
+  (pcase python-backend
+    ;; lsp setup eldoc on its own
+    (`anaconda (spacemacs//python-setup-anaconda-eldoc))))
+
+
+;; anaconda
+
+(defun spacemacs//python-setup-anaconda ()
+  "Setup anaconda backend."
+  (anaconda-mode))
+
+(defun spacemacs//python-setup-anaconda-company ()
+  "Setup anaconda auto-completion."
+  (spacemacs|add-company-backends
+    :backends company-anaconda
+    :modes python-mode
+    :append-hooks nil
+    :call-hooks t)
+  (company-mode))
+
+(defun spacemacs//python-setup-anaconda-eldoc ()
+  "Setup anaconda eldoc."
+  (eldoc-mode)
+  (when (configuration-layer/package-used-p 'anaconda-mode)
+    (anaconda-eldoc-mode)))
+
+(defun spacemacs/anaconda-view-forward-and-push ()
+  "Find next button and hit RET"
+  (interactive)
+  (forward-button 1)
+  (call-interactively #'push-button))
+
+(defun spacemacs//disable-semantic-idle-summary-mode ()
+  "Disable semantic-idle-summary in Python mode.
+Anaconda provides more useful information but can not do it properly
+when this mode is enabled since the minibuffer is cleared all the time."
+  (semantic-idle-summary-mode 0))
+
+
+;; lsp
+
+(defun spacemacs//python-setup-lsp ()
+  "Setup lsp backend."
+  (if (configuration-layer/layer-used-p 'lsp)
+      (progn
+        (lsp-python-enable))
+    (message "`lsp' layer is not installed, please add `lsp' layer to your dotfile.")))
+
+(defun spacemacs//python-setup-lsp-company ()
+  "Setup lsp auto-completion."
+  (if (configuration-layer/layer-used-p 'lsp)
+      (progn
+        (spacemacs|add-company-backends
+          :backends company-lsp
+          :modes python-mode
+          :append-hooks nil
+          :call-hooks t)
+        (company-mode))
+    (message "`lsp' layer is not installed, please add `lsp' layer to your dotfile.")))
+
+
+;; others
+
 (defun spacemacs//python-default ()
   "Defaut settings for python buffers"
   (setq mode-name "Python"
         tab-width python-tab-width
         fill-column python-fill-column)
+
+  ;; since we changed the tab-width we need to manually call python-indent-guess-indent-offset here
+  (when python-spacemacs-indent-guess
+    (python-indent-guess-indent-offset))
+
   (when (version< emacs-version "24.5")
     ;; auto-indent on colon doesn't work well with if statement
     ;; should be fixed in 24.5 and above
@@ -28,31 +110,41 @@
   "Highlight break point lines."
   (interactive)
   (highlight-lines-matching-regexp "import \\(pdb\\|ipdb\\|pudb\\|wdb\\)")
-  (highlight-lines-matching-regexp "\\(pdb\\|ipdb\\|pudb\\|wdb\\).set_trace()"))
+  (highlight-lines-matching-regexp "\\(pdb\\|ipdb\\|pudb\\|wdb\\).set_trace()")
+  (highlight-lines-matching-regexp "trepan.api.debug()"))
 
 (defun spacemacs/pyenv-executable-find (command)
-  "Find executable taking pyenv shims into account."
+  "Find executable taking pyenv shims into account.
+If the executable is a system executable and not in the same path
+as the pyenv version then also return nil. This works around https://github.com/pyenv/pyenv-which-ext
+"
   (if (executable-find "pyenv")
       (progn
-        (let ((pyenv-string (shell-command-to-string (concat "pyenv which " command))))
-          (unless (string-match "not found" pyenv-string)
-            (string-trim pyenv-string))))
+        (let ((pyenv-string (shell-command-to-string (concat "pyenv which " command)))
+              (pyenv-version-names (split-string (string-trim (shell-command-to-string "pyenv version-name")) ":"))
+              (executable nil)
+              (i 0))
+          (if (not (string-match "not found" pyenv-string))
+              (while (and (not executable)
+                          (< i (length pyenv-version-names)))
+                (if (string-match (elt pyenv-version-names i) (string-trim pyenv-string))
+                    (setq executable (string-trim pyenv-string)))
+                (if (string-match (elt pyenv-version-names i) "system")
+                    (setq executable (string-trim (executable-find command))))
+                (setq i (1+ i))))
+          executable))
     (executable-find command)))
 
 (defun spacemacs//python-setup-shell (&rest args)
   (if (spacemacs/pyenv-executable-find "ipython")
       (progn (setq python-shell-interpreter "ipython")
-             (if (version< (replace-regexp-in-string "\n$" "" (shell-command-to-string "ipython --version")) "5")
+             (if (version< (replace-regexp-in-string "[\r\n|\n]$" "" (shell-command-to-string (format "%s --version" (string-trim (spacemacs/pyenv-executable-find "ipython"))))) "5")
                  (setq python-shell-interpreter-args "-i")
                (setq python-shell-interpreter-args "--simple-prompt -i")))
     (progn
       (setq python-shell-interpreter-args "-i")
       (setq python-shell-interpreter "python"))))
 
-(defun spacemacs//python-setup-hy (&rest args)
-  (setq hy-mode-inferior-lisp-command
-        (concat (or (spacemacs/pyenv-executable-find "hy") "hy")
-                " --spy")))
 
 (defun spacemacs//python-setup-checkers (&rest args)
   (when (fboundp 'flycheck-set-checker-executable)
@@ -65,13 +157,13 @@
 
 (defun spacemacs/python-setup-everything (&rest args)
   (apply 'spacemacs//python-setup-shell args)
-  (apply 'spacemacs//python-setup-hy args)
   (apply 'spacemacs//python-setup-checkers args))
 
 (defun spacemacs/python-toggle-breakpoint ()
   "Add a break point, highlight it."
   (interactive)
-  (let ((trace (cond ((spacemacs/pyenv-executable-find "wdb") "import wdb; wdb.set_trace()")
+  (let ((trace (cond ((spacemacs/pyenv-executable-find "trepan3k") "import trepan.api; trepan.api.debug()")
+                     ((spacemacs/pyenv-executable-find "wdb") "import wdb; wdb.set_trace()")
                      ((spacemacs/pyenv-executable-find "ipdb") "import ipdb; ipdb.set_trace()")
                      ((spacemacs/pyenv-executable-find "pudb") "import pudb; pudb.set_trace()")
                      ((spacemacs/pyenv-executable-find "ipdb3") "import ipdb; ipdb.set_trace()")
@@ -133,12 +225,6 @@
 
 ;; Tests
 
-(defun spacemacs//disable-semantic-idle-summary-mode ()
-  "Disable semantic-idle-summary in Python mode.
-Anaconda provides more useful information but can not do it properly
-when this mode is enabled since the minibuffer is cleared all the time."
-  (semantic-idle-summary-mode 0))
-
 (defun spacemacs//python-imenu-create-index-use-semantic-maybe ()
   "Use semantic if the layer is enabled."
   (setq imenu-create-index-function 'spacemacs/python-imenu-create-index))
@@ -165,6 +251,8 @@ when this mode is enabled since the minibuffer is cleared all the time."
 ARG is the universal-argument which chooses between the main and
 the secondary test runner. FUNCALIST is an alist of the function
 to be called for each testrunner. "
+  (when python-save-before-test
+      (save-buffer))
   (let* ((test-runner (if arg
                           (spacemacs//python-get-secondary-testrunner)
                         (spacemacs//python-get-main-testrunner)))
@@ -173,6 +261,11 @@ to be called for each testrunner. "
         (funcall (cdr (assoc test-runner funcalist)))
       (user-error "This test function is not available with the `%S' runner."
                   test-runner))))
+
+(defun spacemacs/python-test-last (arg)
+  "Re-run the last test command"
+  (interactive "P")
+  (spacemacs//python-call-correct-test-function arg '((nose . nosetests-again))))
 
 (defun spacemacs/python-test-all (arg)
   "Run all tests."
@@ -230,6 +323,7 @@ to be called for each testrunner. "
     "ta" 'spacemacs/python-test-all
     "tB" 'spacemacs/python-test-pdb-module
     "tb" 'spacemacs/python-test-module
+    "tl" 'spacemacs/python-test-last
     "tT" 'spacemacs/python-test-pdb-one
     "tt" 'spacemacs/python-test-one
     "tM" 'spacemacs/python-test-pdb-module
@@ -243,14 +337,6 @@ to be called for each testrunner. "
   (when (and python-sort-imports-on-save
              (derived-mode-p 'python-mode))
     (py-isort-before-save)))
-
-
-;;* Anaconda
-(defun spacemacs/anaconda-view-forward-and-push ()
-  "Find next button and hit RET"
-  (interactive)
-  (forward-button 1)
-  (call-interactively #'push-button))
 
 
 ;; REPL
@@ -308,7 +394,7 @@ to be called for each testrunner. "
   (let ((universal-argument t)
         (compile-command (format "%s %s"
                                  (spacemacs/pyenv-executable-find python-shell-interpreter)
-                                 (file-name-nondirectory buffer-file-name))))
+                                 (shell-quote-argument (file-name-nondirectory buffer-file-name)))))
     (if arg
         (call-interactively 'compile)
       (compile compile-command t)
@@ -328,12 +414,3 @@ to be called for each testrunner. "
 (when (version< emacs-version "25")
   (advice-add 'wisent-python-default-setup :after
               #'spacemacs//python-imenu-create-index-use-semantic-maybe))
-
-
-;; Eldoc
-
-(defun spacemacs//init-eldoc-python-mode ()
-  "Initialize elddoc for python buffers"
-  (eldoc-mode)
-  (when (configuration-layer/package-used-p 'anaconda-mode)
-    (anaconda-eldoc-mode)))

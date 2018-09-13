@@ -4,6 +4,7 @@
 
 * Table of Contents                                         :TOC_4_gh:noexport:
 - [[#description][Description]]
+  - [[#features][Features:]]
 - [[#install][Install]]
   - [[#wakatime-program][Wakatime Program]]
   - [[#layer][Layer]]
@@ -20,17 +21,22 @@ time you spend programming so you never have to manually track it again!
 
 P.S. wakati means time in Swahili
 
+** Features:
+- Integration with Wakatime cloud based time tracking service
+
 * Install
 ** Wakatime Program
 You can follow wakatime installation instructions here
 https://github.com/wakatime/wakatime-mode.
 
 In short it's just:
+
 #+BEGIN_SRC sh
 pip install wakatime
 #+END_SRC
 
 And for some linux users
+
 #+BEGIN_SRC sh
 sudo pip install wakatime
 #+END_SRC
@@ -41,6 +47,7 @@ add =wakatime= to the existing =dotspacemacs-configuration-layers= list in this
 file.
 
 Example:
+
 #+BEGIN_SRC emacs-lisp
   (setq-default dotspacemacs-configuration-layers
                 '(

@@ -1,6 +1,6 @@
 ;;; packages.el --- Neotree Layer packages File
 ;;
-;; Copyright (c) 2012-2017 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -9,11 +9,11 @@
 ;;
 ;;; License: GPLv3
 
-(setq neotree-packages
-      '(
-        neotree
-        winum
-        ))
+(defconst neotree-packages
+  '(
+    neotree
+    winum
+    ))
 
 (defun neotree/init-neotree ()
   (use-package neotree
@@ -34,6 +34,9 @@
             neo-modern-sidebar t
             neo-vc-integration nil)
 
+      (when (eq 'darwin system-type)
+       (setq neo-default-system-application "open"))
+
       (spacemacs|define-transient-state neotree
         :title "NeoTree Key Hints"
         :doc "
@@ -51,7 +54,7 @@ Navigation^^^^             Actions^^         Visual actions/config^^^
 [_RET_] open               ^^^^              [_?_]   close hints
 "
         :bindings
-        ("RET" neotree-enter)
+        ("RET" spacemacs/neotree-expand-or-open)
         ("TAB" neotree-stretch-toggle)
         ("|" neotree-enter-vertical-split)
         ("-" neotree-enter-horizontal-split)
@@ -79,7 +82,7 @@ Navigation^^^^             Actions^^         Visual actions/config^^^
           :mode neotree-mode
           :bindings
           (kbd "TAB")  'neotree-stretch-toggle
-          (kbd "RET") 'neotree-enter
+          (kbd "RET") 'spacemacs/neotree-expand-or-open
           (kbd "|") 'neotree-enter-vertical-split
           (kbd "-") 'neotree-enter-horizontal-split
           (kbd "'") 'neotree-quick-look
@@ -106,9 +109,14 @@ Navigation^^^^             Actions^^         Visual actions/config^^^
         "fT" 'neotree-show
         "pt" 'neotree-find-project-root))
     :config
-    (spacemacs//neotree-key-bindings)))
+    (progn
+      (spacemacs//neotree-key-bindings)
+      (add-to-list 'spacemacs-window-split-ignore-prefixes neo-buffer-name))))
 
 (defun neotree/pre-init-winum ()
   (spacemacs|use-package-add-hook winum
     :post-config
+    ;; window 0 is reserved for file trees
+    (spacemacs/set-leader-keys "0" #'neotree-show)
+    (define-key winum-keymap (kbd "M-0") #'neotree-show)
     (add-to-list 'winum-assign-functions #'spacemacs//winum-neotree-assign-func)))

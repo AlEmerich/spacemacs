@@ -6,6 +6,7 @@
   - [[#what-is-the-official-pronunciation-of-spacemacs][What is the official pronunciation of Spacemacs?]]
   - [[#why-do-you-call-this-a-distribution-i-dont-see-any-spacemacs-executable][Why do you call this a "distribution", I don't see any "Spacemacs" executable?]]
   - [[#why-are-packages-installed-with-package-install-automatically-deleted-by-spacemacs-when-it-boots][Why are packages installed with =package-install= automatically deleted by Spacemacs when it boots?]]
+  - [[#environment-variables-or-path-are-not-set-properly][Environment variables or PATH are not set properly]]
   - [[#how-to-fix-package-download-errors-when-installing-spacemacs-][How to fix package download errors when installing Spacemacs ?]]
   - [[#how-to-fix-symbols-value-as-variable-is-void-errors-on-startup][How to fix =Symbol's value as variable is void= errors on startup?]]
   - [[#how-to-fix-wrong-type-argument-arrayp-nil-errors-on-startup][How to fix =(wrong-type-argument arrayp nil)= errors on startup?]]
@@ -62,7 +63,7 @@ As it is written, that is _space_ then _macs_.
 ** Why do you call this a "distribution", I don't see any "Spacemacs" executable?
 Although we could do it we don't package Emacs with Spacemacs. We allow users to
 choose whatever build of Emacs they want that works with their OS, this is more
-flexible and it saves use tons of issues. Spacemacs is more than a configuration
+flexible and it saves us tons of issues. Spacemacs is more than a configuration
 of Emacs it comes with advanced feature, concepts and tooling. Roughly, think of
 it as a Linux distribution where we would ask people to install the kernel first
 and then fetch somehow the actual code to get the distribution.
@@ -84,6 +85,12 @@ To install packages that does not belong to any Spacemacs layers, you can:
   manually.
 
 To create a new configuration layer see the [[https://github.com/syl20bnr/spacemacs/blob/master/doc/QUICK_START.org][quick start guide]] for more info.
+
+** Environment variables or PATH are not set properly
+If you use Emacs GUI and don't launch if from a terminal then edit the
+environment variables in the =env= file. You can open this file with
+~SPC f e e~. More information in the =Environment variables= section of the
+[[https://github.com/syl20bnr/spacemacs/blob/master/doc/DOCUMENTATION.org][documentation]].
 
 ** How to fix package download errors when installing Spacemacs ?
 Since 0.105.0 HTTPS protocol is used by default to download packages. If your
@@ -113,8 +120,9 @@ Install the default font supported by Spacemacs or choose a fixed width font.
 More information in the font section of the [[https://github.com/syl20bnr/spacemacs/blob/develop/doc/DOCUMENTATION.org][documentation]].
 
 ** The powerline separators are ugly, how can I fix them?
-Use the property =:powerline-scale= of the variable =dotspacemacs-default-font=.
-See font section of the [[https://github.com/syl20bnr/spacemacs/blob/develop/doc/DOCUMENTATION.org][documentation]] for more details.
+Use the property =:separator-scale= of the variable
+=dotspacemacs-mode-line-theme=. See mode-line section of the [[https://github.com/syl20bnr/spacemacs/blob/develop/doc/DOCUMENTATION.org][documentation]] for
+more details.
 
 ** The powerline separators have no anti-aliasing, what can I do?
 Emacs powerline uses XMP images to draw the separators in a graphical
@@ -315,6 +323,7 @@ useless. The variable =spacemacs-useful-buffers-regexp= marks buffers matching
 the regexp as useful buffers. Both can be customized the same way.
 
 Examples:
+
 #+BEGIN_SRC emacs-lisp
 ;; Only mark helm buffers as useless
 (setq spacemacs-useless-buffers-regexp '("\\*helm\.\+\\*"))
@@ -370,6 +379,8 @@ include this on your =dotspacemacs/user-config=.
 (add-hook 'ruby-mode-hook #'(lambda () (modify-syntax-entry ?_ "w")))
 ;; For Javascript
 (add-hook 'js2-mode-hook #'(lambda () (modify-syntax-entry ?_ "w")))
+;; For all programming modes
+(add-hook 'prog-mode-hook #'(lambda () (modify-syntax-entry ?_ "w")))
 #+END_SRC
 
 ** Setup =$PATH=?
@@ -534,6 +545,7 @@ arguments of the =ag= program.
 
 ** Modify spacemacs documentation look (space-doc-mode)
 You can modify the list of visual enhancements applied by the =space-doc-mode=:
+
 #+BEGIN_SRC emacs-lisp
 (setq spacemacs-space-doc-modificators
       '(center-buffer-mode
@@ -547,6 +559,7 @@ You can modify the list of visual enhancements applied by the =space-doc-mode=:
         org-kbd-face-remap
         resize-inline-images))
 #+END_SRC
+
 By default only =center-buffer-mode= is disabled.
 Both =space-doc-mode= and =center-buffer-mode= can be customized
 with "Easy Customization Interface".
@@ -556,6 +569,7 @@ In vim and evil, pasting over a text would cause it to be copied, hence making i
 the same text multiple times.
 
 To fix this, add the following snippet to your ~user-config~:
+
 #+BEGIN_SRC emacs-lisp
 (defun evil-paste-after-from-0 ()
   (interactive)
