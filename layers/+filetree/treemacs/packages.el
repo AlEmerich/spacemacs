@@ -10,11 +10,13 @@
 ;;; License: GPLv3
 
 (defconst treemacs-packages
-  '(golden-ratio
+  '(
+    golden-ratio
     treemacs
     (treemacs-evil :toggle (memq dotspacemacs-editing-style '(vim hybrid)))
     treemacs-projectile
-    winum))
+    winum
+    ))
 
 (defun treemacs/pre-init-golden-ratio ()
   (spacemacs|use-package-add-hook golden-ratio
@@ -64,7 +66,7 @@
         (treemacs-follow-mode t))
       (when treemacs-use-filewatch-mode
         (treemacs-filewatch-mode t))
-      (when (memq treemacs-use-git-mode '(simple extended))
+      (when (memq treemacs-use-git-mode '(simple extended deferred))
         (treemacs-git-mode treemacs-use-git-mode))
       (add-to-list 'spacemacs-window-split-ignore-prefixes
                    treemacs--buffer-name-prefix))))

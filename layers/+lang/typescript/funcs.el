@@ -40,10 +40,6 @@
       (kbd "C-k") 'tide-find-previous-reference
       (kbd "C-j") 'tide-find-next-reference
       (kbd "C-l") 'tide-goto-reference)
-    (add-to-list 'spacemacs-jump-handlers-typescript-tsx-mode
-                 '(tide-jump-to-definition :async t))
-    (add-to-list 'spacemacs-jump-handlers-typescript-mode
-                 '(tide-jump-to-definition :async t))
     (tide-setup)))
 
 (defun spacemacs//typescript-setup-tide-company ()
@@ -65,8 +61,7 @@
 (defun spacemacs//typescript-setup-lsp ()
   "Setup lsp backend."
   (if (configuration-layer/layer-used-p 'lsp)
-      (progn
-        (lsp-javascript-typescript-enable))
+      (lsp)
     (message (concat "`lsp' layer is not installed, "
                      "please add `lsp' layer to your dotfile."))))
 

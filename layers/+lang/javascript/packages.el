@@ -24,12 +24,12 @@
         js2-mode
         js2-refactor
         livid-mode
-        (lsp-javascript-typescript :requires lsp-mode)
         org
         prettier-js
         skewer-mode
         tern
-        web-beautify))
+        web-beautify
+        ))
 
 (defun javascript/post-init-add-node-modules-path ()
   (spacemacs/add-to-hooks #'add-node-modules-path '(css-mode-hook
@@ -45,8 +45,7 @@
   (add-hook 'js2-mode-local-vars-hook #'spacemacs//javascript-setup-company))
 
 (defun javascript/post-init-flycheck ()
-  (spacemacs/enable-flycheck 'js2-mode)
-  (add-hook 'js2-mode-hook #'spacemacs//javascript-setup-eslint t))
+  (spacemacs/enable-flycheck 'js2-mode))
 
 (defun javascript/post-init-ggtags ()
   (add-hook 'js2-mode-local-vars-hook #'spacemacs/ggtags-mode-enable))
@@ -164,12 +163,6 @@
         :documentation "Live evaluation of JS buffer change."
         :evil-leader-for-mode (js2-mode . "Tl"))
       (spacemacs|diminish livid-mode " 🅻" " [l]"))))
-
-(defun javascript/init-lsp-javascript-typescript ()
-  (use-package lsp-javascript-typescript
-    :commands lsp-javascript-typescript-enable
-    :defer t
-    :config (spacemacs//setup-lsp-jump-handler 'js2-mode)))
 
 (defun javascript/pre-init-prettier-js ()
   (if (eq javascript-fmt-tool 'prettier)

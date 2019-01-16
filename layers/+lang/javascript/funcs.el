@@ -31,7 +31,7 @@
   "Setup lsp backend."
   (if (configuration-layer/layer-used-p 'lsp)
       (progn
-        (lsp-javascript-typescript-enable))
+        (lsp))
     (message (concat "`lsp' layer is not installed, "
                      "please add `lsp' layer to your dotfile."))))
 
@@ -64,13 +64,6 @@
         (spacemacs/tern-setup-tern-company 'js2-mode))
     (message (concat "Tern was configured as the javascript backend but "
                      "the `tern' layer is not present in your `.spacemacs'!"))))
-
-
-;; flycheck
-
-(defun spacemacs//javascript-setup-eslint ()
-  (when-let ((found (executable-find "eslint_d")))
-    (set (make-local-variable 'flycheck-javascript-eslint-executable) found)))
 
 
 ;; js-doc

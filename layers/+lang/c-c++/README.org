@@ -23,13 +23,14 @@
   - [[#enable-google-set-c-style][Enable google-set-c-style]]
   - [[#newlines][Newlines]]
   - [[#projectile-sub-project-adoption][Projectile sub-project adoption]]
-- [[#key-bindings][Key Bindings]]
+- [[#key-bindings][Key bindings]]
   - [[#formatting-clang-format][Formatting (clang-format)]]
   - [[#rtags-1][RTags]]
   - [[#cquery--ccls][cquery / ccls]]
-    - [[#goto][goto]]
-    - [[#helphierarchy][help/hierarchy]]
     - [[#backend-language-server][backend (language server)]]
+    - [[#goto][goto]]
+      - [[#gotohierarchy][goto/hierarchy]]
+      - [[#gotomember][goto/member]]
 
 * Description
 This layer adds configuration for C/C++ language.
@@ -84,8 +85,7 @@ Install the RTags server via [[https://formulae.brew.sh/formula/rtags][homebrew]
 N.B. RTags is not supported on Windows at the time of writing, although there is an [[https://github.com/Andersbakken/rtags/issues/770][open issue with some recent activity]] on github.
 
 **** Configuration
-To enable support for =rtags=, set the layer variable
-=c-c++-enable-rtags-support= to =t= in your dotfile.
+To enable support for =rtags=, set the layer variable =c-c++-backend=:
 
 #+BEGIN_SRC emacs-lisp
   (setq-default dotspacemacs-configuration-layers
@@ -165,7 +165,7 @@ specifying an explicit =c-c++-lsp-cache-dir=. Setting this value to a relative p
 subdirectory of your project root.
 
 There are other initialization options such as the number of indexer threads, cache serialization format.
-They have good default values. See [[file:./config.el][config.el]] and the backends' respective homepages for more info.
+They have good default values. See =config.el= of the layer and the backends’ respective homepages for more info.
 - [[https://github.com/cquery-project/cquery/wiki/Emacs][Emacs section of =cquery= wiki]]
 - [[https://github.com/MaskRay/ccls/wiki/Emacs][Emacs section of =ccls= wiki]]
 
@@ -235,8 +235,7 @@ would look is that in your list of =dostpacemacs-configuration-layers= you have
 an entry like
 
 #+BEGIN_SRC emacs-lisp
-  (c-c++ :variables
-         c-c++-enable-google-style t)
+  (c-c++ :variables c-c++-enable-google-style t)
 #+END_SRC
 
 Additionally, if you have =c-c++-enable-google-newline= variable set then
@@ -244,17 +243,16 @@ Additionally, if you have =c-c++-enable-google-newline= variable set then
 set that up like this:
 
 #+BEGIN_SRC emacs-lisp
-  (c-c++ :variables
-         c-c++-enable-google-style t
-         c-c++-enable-google-newline t)
+  (c-c++ :variables c-c++-enable-google-style t
+                    c-c++-enable-google-newline t)
+#+END_SRC
 
 ** Newlines
 You can enable the =Auto-newline= minor mode that automatically adds newlines
 after certain characters by setting the =c-c++-enable-auto-newline= variable.
 
 #+BEGIN_SRC emacs-lisp
-  (c-c++ :variables
-         c-c++-enable-auto-newline t)
+  (c-c++ :variables c-c++-enable-auto-newline t)
 #+END_SRC
 
 ** Projectile sub-project adoption
@@ -262,16 +260,15 @@ To prevent projectile from using subproject root when visiting files in a subpro
 set =c-c++-adopt-subprojects= to =t=.
 
 #+BEGIN_SRC emacs-lisp
-  (c-c++ :variables
-         c-c++-adopt-subprojects t)
-#+END_SRC emacs-lisp
+  (c-c++ :variables c-c++-adopt-subprojects t)
+#+END_SRC
 
 This is based on a recommendation on the =cquery= and =ccls= wikis, but should be more
 generally applicable.
 
-* Key Bindings
+* Key bindings
 
-| Key Binding | Description                                                   |
+| Key binding | Description                                                   |
 |-------------+---------------------------------------------------------------|
 | ~SPC m g a~ | open matching file                                            |
 |             | (e.g. switch between .cpp and .h, requires a project to work) |
@@ -284,14 +281,14 @@ generally applicable.
 
 ** Formatting (clang-format)
 
-| Key Binding | Description                     |
+| Key binding | Description                     |
 |-------------+---------------------------------|
 | ~SPC m = =~ | format current region or buffer |
 | ~SPC m = f~ | format current function         |
 
 ** RTags
 
-| Key Binding | Description                     |
+| Key binding | Description                     |
 |-------------+---------------------------------|
 | ~SPC m g .~ | find symbol at point            |
 | ~SPC m g ,~ | find references at point        |
@@ -324,35 +321,45 @@ generally applicable.
 | ~SPC m g Y~ | cycle overlays on screen        |
 
 ** cquery / ccls
-The keybindings listed below are in addition to the default keybindings defined by the [[file:../../+tools/lsp/README.org][LSP layer]].
+The key bindings listed below are in addition to the default key bindings defined by the [[file:../../+tools/lsp/README.org][LSP layer]].
+A ~[ccls]~ or ~[cquery]~ suffix indicates that the binding is for the indicated backend only.
+
+*** backend (language server)
+
+| Key binding | Description                              |
+|-------------+------------------------------------------|
+| ~SPC m b f~ | refresh index (e.g. after branch change) |
+| ~SPC m b p~ | preprocess file                          |
 
 *** goto
 
-| Key Binding | Description               |
+| Key binding | Description               |
 |-------------+---------------------------|
 | ~SPC m g &~ | find references (address) |
 | ~SPC m g R~ | find references (read)    |
 | ~SPC m g W~ | find references (write)   |
 | ~SPC m g c~ | find callers              |
-| ~SPC m g C~ | find callees             |
+| ~SPC m g C~ | find callees              |
 | ~SPC m g v~ | vars                      |
+| ~SPC m g f~ | find file at point (ffap) |
+| ~SPC m g F~ | ffap other window         |
 
-*** help/hierarchy
+**** goto/hierarchy
 
-| Key Binding | Description                 |
-|-------------+-----------------------------|
-| ~SPC m h b~ | base class(es)              |
-| ~SPC m h d~ | derived class(es)           |
-| ~SPC m h c~ | call hierarchy              |
-| ~SPC m h C~ | call hierarchy (inv)        |
-| ~SPC m h i~ | inheritance hierarchy       |
-| ~SPC m h I~ | inheritance hierarchy (inv) |
-| ~SPC m h m~ | member hierarchy            |
-| ~SPC m h M~ | member hierarchy (inv)      |
+| Key binding   | Description                 |
+|---------------+-----------------------------|
+| ~SPC m g h b~ | base class(es)              |
+| ~SPC m g h d~ | derived class(es) [ccls]    |
+| ~SPC m g h c~ | call hierarchy              |
+| ~SPC m g h C~ | call hierarchy (inv)        |
+| ~SPC m g h i~ | inheritance hierarchy       |
+| ~SPC m g h I~ | inheritance hierarchy (inv) |
 
-*** backend (language server)
+**** goto/member
 
-| Key Binding | Description                              |
-|-------------+------------------------------------------|
-| ~SPC m b f~ | refresh index (e.g. after branch change) |
-| ~SPC m b p~ | preprocess file                          |
+| Key binding   | Description             |
+|---------------+-------------------------|
+| ~SPC m g m h~ | member hierarchy        |
+| ~SPC m g m t~ | member types [ccls]     |
+| ~SPC m g m f~ | member functions [ccls] |
+| ~SPC m g m v~ | member variables [ccls] |
