@@ -1,8 +1,10 @@
 #+TITLE: Shell layer
 
+#+TAGS: layer|tool
+
 [[file:img/shell.png]]
 
-* Table of Contents                     :TOC_4_gh:noexport:
+* Table of Contents                     :TOC_5_gh:noexport:
 - [[#description][Description]]
   - [[#features][Features:]]
 - [[#install][Install]]
@@ -208,6 +210,7 @@ Some advanced configuration is setup for =eshell= in this layer:
 | ~SPC a s m~ | Open, close or go to a =multi-term=                        |
 | ~SPC a s t~ | Open, close or go to a =ansi-term=                         |
 | ~SPC a s T~ | Open, close or go to a =term=                              |
+| ~TAB~       | browse completion with =helm=                              |
 | ~SPC m H~   | browse history with =helm= (works in =eshell= and =shell=) |
 | ~C-j~       | next item in history                                       |
 | ~C-k~       | previous item in history                                   |
@@ -221,15 +224,17 @@ in the current buffer instead of a popup.
 
 ** Multi-term
 
-| Key binding | Description                  |
-|-------------+------------------------------|
-| ~SPC m c~   | create a new multi-term      |
-| ~SPC m n~   | go to next multi-term        |
-| ~SPC m p~   | go to previous multi-term    |
-| ~SPC p $ t~ | run multi-term shell in root |
+| Key binding            | Description                    |
+|------------------------+--------------------------------|
+| ~SPC m c~              | create a new multi-term        |
+| ~SPC m C~              | switch multi-term char mode    |
+| ~SPC m l~              | switch multi-term to line mode |
+| ~SPC m n~              | go to next multi-term          |
+| ~SPC m N~ or ~SPC m p~ | go to previous multi-term      |
+| ~SPC p $ t~            | run multi-term shell in root   |
 
 ** Eshell
 
-| Key binding        | Description                                |
-|--------------------+--------------------------------------------|
-| ~SPC m H~ or ~M-l~ | shell commands history using a helm buffer |
+| Key binding        | Description                                       |
+|--------------------+---------------------------------------------------|
+| ~SPC m H~ or ~M-l~ | shell commands history using a helm or ivy buffer |
