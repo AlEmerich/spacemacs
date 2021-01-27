@@ -1,6 +1,6 @@
 ;;; packages.el --- Markdown Layer packages File for Spacemacs
 ;;
-;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -20,6 +20,7 @@
         mmm-mode
         org
         smartparens
+        valign
         (vmd-mode :toggle (eq 'vmd markdown-live-preview-engine))
         ))
 
@@ -46,17 +47,24 @@
       (spacemacs/set-leader-keys-for-major-mode mode
         "cr" 'gh-md-render-buffer))))
 
+(defun markdown/post-init-valign ()
+  (add-hook 'markdown-mode-hook 'valign-mode))
+
 (defun markdown/post-init-smartparens ()
   (add-hook 'markdown-mode-hook 'smartparens-mode))
 
 (defun markdown/init-markdown-mode ()
   (use-package markdown-mode
     :mode
-    (("\\.m[k]d" . markdown-mode)
-     ("\\.mdk" . markdown-mode))
+    (("\\.mkd\\'" . markdown-mode)
+     ("\\.mdk\\'" . markdown-mode)
+     ("\\.mdx\\'" . markdown-mode))
     :defer t
     :config
     (progn
+      ;; Make markdown-mode behave a bit more like org w.r.t. code blocks i.e.
+      ;; use proper syntax highlighting
+      (setq markdown-fontify-code-blocks-natively t)
       ;; Declare prefixes and bind keys
       (dolist (prefix '(("mc" . "markdown/command")
                         ("mh" . "markdown/header")
@@ -137,6 +145,7 @@
           "xc"  'markdown-insert-code
           "xC"  'markdown-insert-gfm-code-block
           "xi"  'markdown-insert-italic
+          "xk"  'markdown-insert-kbd
           "xp"  'markdown-insert-pre
           "xq"  'markdown-insert-blockquote
           "xs"  'markdown-insert-strike-through

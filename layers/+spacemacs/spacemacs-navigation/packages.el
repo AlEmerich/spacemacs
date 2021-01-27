@@ -1,6 +1,6 @@
 ;;; packages.el --- Spacemacs Navigation Layer packages File
 ;;
-;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -16,6 +16,7 @@
         centered-cursor-mode
         (compile :location built-in)
         (doc-view :location built-in)
+        (view :location built-in)
         golden-ratio
         (grep :location built-in)
         (info+ :location local)
@@ -36,6 +37,8 @@
         (define-key Info-mode-map "o" 'ace-link-info))
       (with-eval-after-load 'help-mode
         (define-key help-mode-map "o" 'ace-link-help))
+      (with-eval-after-load 'woman
+        (define-key woman-mode-map "o" 'link-hint-open-link))
       (with-eval-after-load 'eww
         (define-key eww-link-keymap "o" 'ace-link-eww)
         (define-key eww-mode-map "o" 'ace-link-eww)))))
@@ -207,12 +210,22 @@
               (doc-view-minor-mode))
           ad-do-it)))))
 
+(defun spacemacs-navigation/init-view ()
+  (use-package view
+    :defer t
+    :init
+    ;; Add binding via mode symbole to have a local binding set
+    ;; after loading view mode. If not done this way the new bindings
+    ;; will only be affective after the user pressing `q' once.
+    (evil-define-key 'normal 'view-mode
+      "q" #'View-quit)))
+
 (defun spacemacs-navigation/init-golden-ratio ()
   (use-package golden-ratio
     :defer t
     :init
     (progn
-      (spacemacs/transient-state-register-add-bindings 'window-manipulation
+      (spacemacs/transient-state-register-add-bindings 'window
         '(("g" spacemacs/toggle-golden-ratio)))
       (spacemacs|add-toggle golden-ratio
         :status golden-ratio-mode
@@ -420,7 +433,7 @@
     (progn
       (setq winum-auto-assign-0-to-minibuffer nil
             winum-auto-setup-mode-line nil
-            winum-ignored-buffers '(" *which-key*"))
+            winum-ignored-buffers '(" *LV*" " *which-key*"))
       (spacemacs/set-leader-keys
         "`" 'winum-select-window-by-number
         "²" 'winum-select-window-by-number

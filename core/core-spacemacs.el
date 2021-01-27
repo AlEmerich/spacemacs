@@ -1,6 +1,6 @@
 ;;; core-spacemacs.el --- Spacemacs Core File
 ;;
-;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -32,6 +32,8 @@
 (require 'core-micro-state)
 (require 'core-transient-state)
 (require 'core-use-package-ext)
+(require 'core-spacebind)
+(require 'core-compilation)
 
 (defgroup spacemacs nil
   "Spacemacs customizations."
@@ -42,6 +44,8 @@
   "Hook run after dotspacemacs/user-config")
 (defvar spacemacs-post-user-config-hook-run nil
   "Whether `spacemacs-post-user-config-hook' has been run")
+(defvar spacemacs-scratch-mode-hook nil
+  "Hook run on buffer *scratch* after `dotspacemacs-scratch-mode' is invoked.")
 
 (defvar spacemacs--default-mode-line mode-line-format
   "Backup of default mode line format.")
@@ -51,6 +55,7 @@ the final step of executing code in `emacs-startup-hook'.")
 
 (defun spacemacs/init ()
   "Perform startup initialization."
+  (setq command-line-args (spacemacs//parse-command-line command-line-args))
   (when spacemacs-debugp (spacemacs/init-debug))
   ;; silence ad-handle-definition about advised functions getting redefined
   (setq ad-redefinition-action 'accept)
@@ -103,7 +108,7 @@ the final step of executing code in `emacs-startup-hook'.")
                                     dotspacemacs-editing-style))
   (configuration-layer/initialize)
   ;; frame title init
-  (when (and (display-graphic-p) dotspacemacs-frame-title-format)
+  (when dotspacemacs-frame-title-format
     (require 'format-spec)
     (setq frame-title-format '((:eval (spacemacs/title-prepare dotspacemacs-frame-title-format))))
     (if dotspacemacs-icon-title-format
@@ -198,6 +203,12 @@ defer call using `spacemacs-post-user-config-hook'."
       (funcall func)
     (add-hook 'spacemacs-post-user-config-hook func)))
 
+(defun spacemacs//byte-compile-cleanup ()
+  "Remove byte-compiled versions of `spacemacs-compiled-files'."
+  (let ((default-directory spacemacs-start-directory))
+    (spacemacs//remove-byte-compiled-files
+     spacemacs-compiled-files)))
+
 (defun spacemacs/setup-startup-hook ()
   "Add post init processing.
 Note: the hooked function is not executed when in dumped mode."
@@ -228,7 +239,8 @@ Note: the hooked function is not executed when in dumped mode."
      (setq spacemacs-post-user-config-hook-run t)
      (when (fboundp dotspacemacs-scratch-mode)
        (with-current-buffer "*scratch*"
-         (funcall dotspacemacs-scratch-mode)))
+         (funcall dotspacemacs-scratch-mode)
+         (run-hooks 'spacemacs-scratch-mode-hook)))
      (when spacemacs--delayed-user-theme
        (spacemacs/load-theme spacemacs--delayed-user-theme
                              spacemacs--fallback-theme t))
@@ -237,6 +249,14 @@ Note: the hooked function is not executed when in dumped mode."
      (spacemacs/check-for-new-version nil spacemacs-version-check-interval)
      (setq spacemacs-initialized t)
      (setq gc-cons-threshold (car dotspacemacs-gc-cons)
-           gc-cons-percentage (cadr dotspacemacs-gc-cons)))))
+           gc-cons-percentage (cadr dotspacemacs-gc-cons))
+     (unless (version< emacs-version "27")
+       (setq read-process-output-max dotspacemacs-read-process-output-max))))
+
+  ;; Ensure that `spacemacs--compiled-files' are byte-compiled.
+  (let ((default-directory spacemacs-start-directory))
+    (spacemacs//ensure-byte-compilation spacemacs--compiled-files))
+  ;; Check if revision has changed.
+  (spacemacs//revision-check))
 
 (provide 'core-spacemacs)

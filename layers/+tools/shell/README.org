@@ -12,17 +12,18 @@
     - [[#check-that-your-emacs-supports-dynamic-modules][Check that your Emacs supports dynamic modules]]
     - [[#install-cmake-311-or-higher][Install CMake 3.11 or higher]]
       - [[#macos][macOS]]
-      - [[#ubuntu-2][Ubuntu]]
-    - [[#install-libtool][Install libtool]]
       - [[#ubuntu][Ubuntu]]
-    - [[#install-libvterm][Install libvterm]]
-      - [[#macos-1][macOS]]
+    - [[#install-libtool][Install libtool]]
       - [[#ubuntu-1][Ubuntu]]
+    - [[#install-libvterm-optional][Install libvterm (Optional)]]
+      - [[#macos-1][macOS]]
+      - [[#linux][Linux]]
       - [[#windows][Windows]]
 - [[#configuration][Configuration]]
   - [[#default-shell][Default shell]]
   - [[#default-shell-position-width-and-height][Default shell position, width, and height]]
-  - [[#set-shell-for-term-and-ansi-term][Set shell for term and ansi-term]]
+  - [[#external-terminal-emulator][External terminal emulator]]
+  - [[#set-shell-for-term-ansi-term-and-vterm][Set shell for term, ansi-term and vterm]]
   - [[#set-shell-for-multi-term][Set shell for multi-term]]
   - [[#width-of-the-shell-popup-buffers][Width of the shell popup buffers]]
   - [[#enable-em-smart-in-eshell][Enable em-smart in Eshell]]
@@ -33,12 +34,14 @@
 - [[#key-bindings][Key bindings]]
   - [[#multi-term][Multi-term]]
   - [[#eshell-1][Eshell]]
+  - [[#vterm][vterm]]
 
 * Description
 This layer configures the various shells available in Emacs.
 
 ** Features:
 - Shell integration
+- Running external terminal emulator in current/project directory
 
 * Install
 To use this configuration layer, add it to your =~/.spacemacs=. You will need to
@@ -63,12 +66,12 @@ source supplying the =./configure --with-module= option at configure time.
 *** Install CMake 3.11 or higher
 **** macOS
 #+BEGIN_SRC shell
-brew install cmake
+  brew install cmake
 #+END_SRC
 
 **** Ubuntu
 #+BEGIN_SRC shell
-sudo apt install cmake
+  sudo apt install cmake
 #+END_SRC
 
 *** Install libtool
@@ -77,27 +80,27 @@ If the =libtool= command does not exist in your system (usually in
 
 **** Ubuntu
 #+BEGIN_SRC shell
-sudo apt install libtool-bin
+  sudo apt install libtool-bin
 #+END_SRC
 
-*** Install libvterm
+*** Install libvterm (Optional)
 **** macOS
 #+BEGIN_SRC shell
-brew install libvterm
+  brew install libvterm
 #+END_SRC
 
-**** Ubuntu
-#+BEGIN_SRC shell
-sudo apt install libvterm-dev
-#+END_SRC
-
-In other distros, find it and install it in your favorite package manager.
+**** Linux
+This library can be found in the official repositories of most distributions
+(e.g., Arch, Debian, Fedora, Gentoo, openSUSE, Ubuntu). If not available, it
+will be downloaded during the compilation process. Some distributions
+(e.g. Ubuntu 18.04) have versions of libvterm that are too old.
+If you find compilation errors related to VTERM_COLOR, you should
+not use your system libvterm.
 
 **** Windows
 Not supported at the moment, [[https://github.com/akermu/emacs-libvterm/issues/12][but possibly coming up]].
 
 * Configuration
-
 ** Default shell
 Emacs supports five types of shells/terminals:
 - the Emacs shell (eshell)
@@ -144,6 +147,12 @@ your shell is positioned on the left or the right.
              shell-default-position 'right
              shell-default-width 40)))
 #+END_SRC
+
+** External terminal emulator
+This layer supports opening an external terminal emulator using [[https://github.com/davidshepherd7/terminal-here][terminal-here]].
+By default =terminal-here= finds an appropriate default shell for you.
+If this does not work please check the package documentation how to
+change it.
 
 ** Set shell for term, ansi-term and vterm
 The default shell can be set by setting the variable =shell-default-term-shell=.
@@ -278,20 +287,22 @@ Some advanced configuration is setup for =eshell= in this layer:
 
 * Key bindings
 
-| Key binding | Description                                                |
-|-------------+------------------------------------------------------------|
-| ~SPC '​~     | Open, close or go to the default shell                     |
-| ~SPC p '​~   | Open a shell in the project's root                         |
-| ~SPC a s e~ | Open, close or go to an =eshell=                           |
-| ~SPC a s i~ | Open, close or go to a =shell=                             |
-| ~SPC a s m~ | Open, close or go to a =multi-term=                        |
-| ~SPC a s t~ | Open, close or go to a =ansi-term=                         |
-| ~SPC a s T~ | Open, close or go to a =term=                              |
-| ~TAB~       | browse completion with =helm=                              |
-| ~SPC m H~   | browse history with =helm= (works in =eshell= and =shell=) |
-| ~SPC a s v~ | Open, close or go to a =vterm=                             |
-| ~C-j~       | next item in history                                       |
-| ~C-k~       | previous item in history                                   |
+| Key binding   | Description                                                |
+|---------------+------------------------------------------------------------|
+| ~SPC '​~       | Open, close or go to the default shell                     |
+| ~SPC "​~       | Open external terminal emulator in current directory       |
+| ~SPC p '​~     | Open a shell in the project's root                         |
+| ~SPC p "​~     | Open external terminal emulator in project root            |
+| ~SPC a t s e~ | Open, close or go to an =eshell=                           |
+| ~SPC a t s i~ | Open, close or go to a =shell=                             |
+| ~SPC a t s m~ | Open, close or go to a =multi-term=                        |
+| ~SPC a t s t~ | Open, close or go to a =ansi-term=                         |
+| ~SPC a t s T~ | Open, close or go to a =term=                              |
+| ~TAB~         | browse completion with =helm=                              |
+| ~SPC m H~     | browse history with =helm= (works in =eshell= and =shell=) |
+| ~SPC a t s v~ | Open, close or go to a =vterm=                             |
+| ~C-j~         | next item in history                                       |
+| ~C-k~         | previous item in history                                   |
 
 *Note:* You can open multiple shells using a numerical prefix argument,
 for instance pressing ~2 SPC '​~ will a second default shell, the
@@ -316,3 +327,14 @@ in the current buffer instead of a popup.
 | Key binding        | Description                                       |
 |--------------------+---------------------------------------------------|
 | ~SPC m H~ or ~M-l~ | shell commands history using a helm or ivy buffer |
+
+** vterm
+~M-r~ will be bound to search for the command history when the variable
+=spacemacs-vterm-history-file-location= is set to the path to your shell history file.
+
+For example with bash
+
+#+BEGIN_SRC elisp
+  (shell :variables
+         spacemacs-vterm-history-file-location "~/.bash_history")
+#+END_SRC

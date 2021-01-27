@@ -1,6 +1,6 @@
 ;;; config.el --- Chinese Layer configuration File for Spacemacs
 ;;
-;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -22,6 +22,9 @@
 
 (defvar chinese-enable-fcitx nil
   "Enable fcitx to help writing Chinese in Evil mode.")
+
+(defvar chinese-use-fcitx5 nil
+  "Enable fcitx5 instead fcitx4.")
 
 (defvar chinese-fcitx-use-dbus nil
   "Use dbus interface for fcitx.el.")

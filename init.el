@@ -1,6 +1,6 @@
 ;;; init.el --- Spacemacs Initialization File
 ;;
-;; Copyright (c) 2012-2018 Sylvain Benner & Contributors
+;; Copyright (c) 2012-2020 Sylvain Benner & Contributors
 ;;
 ;; Author: Sylvain Benner <sylvain.benner@gmail.com>
 ;; URL: https://github.com/syl20bnr/spacemacs
@@ -24,6 +24,11 @@
       nil (not init-file-debug))
 (load (concat spacemacs-core-directory "core-dumper.el")
       nil (not init-file-debug))
+
+(load (concat spacemacs-core-directory "core-compilation.el")
+      nil (not init-file-debug))
+(let ((default-directory spacemacs-start-directory))
+  (spacemacs//remove-byte-compiled-if-stale spacemacs--compiled-files))
 
 (if (not (version<= spacemacs-emacs-min-version emacs-version))
     (error (concat "Your version of Emacs (%s) is too old. "

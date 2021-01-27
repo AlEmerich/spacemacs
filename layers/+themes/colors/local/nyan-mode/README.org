@@ -34,7 +34,7 @@ point from 0% to 100%.
 
 "Nyan-mode. It's things like this that make me proud to be an emacs user." - [[http://twitter.com/#!/mitchellh/status/104931263479156736][mitchellh]]
 
-Nyanmacs is expanding!! [[http://jacek.zlydach.pl/blog/2011-08-25-introducing-nyan-mode-el-turn-your-emacs-into-nyanmacs.html][Read the story so far]]! :).
+Nyanmacs is expanding!! [[https://web.archive.org/web/20190506122454/http://jacek.zlydach.pl/blog/2011-08-25-introducing-nyan-mode-el-turn-your-emacs-into-nyanmacs.html][Read the story so far]]! :).
 
 ** Using Nyan Mode with custom modeline
 For those who were asking, or are planning to, [[http://amitp.blogspot.com/2011/08/emacs-custom-mode-line.html][Amit Patel shared]]
@@ -66,7 +66,7 @@ Customizing nyan-animate-nyancat is broken; don't do it.
 
 ** Credits
 Code and idea inspired by sml-modeline.el, written by Lennart Borgman.
-See: [[http://bazaar.launchpad.net/~nxhtml/nxhtml/main/annotate/head%3A/util/sml-modeline.el]]
+See: [[https://www.emacswiki.org/emacs/sml-modeline.el]]
 
 For animated Nyan Cat, I used frames [[http://media.photobucket.com/image/nyan%20cat%20sprites/DryBowser455/th_NyanCatSprite.png?t=1304659408][by DryBowser455]].
 
